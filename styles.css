@@ -1,24 +1,24 @@
-.webfs-explorer__directory {
+.remfs-explorer__directory {
   border-top: 2px solid #222;
 }
 
-.webfs-explorer__list-item {
+.remfs-explorer__list-item {
   --color: #222;
   font-size: 18px;
   text-decoration: none;
   color: var(--color);
 }
 
-.webfs-explorer__list-item:visited {
+.remfs-explorer__list-item:visited {
   color: var(--color);
 }
 
-.webfs-explorer__list-content {
+.remfs-explorer__list-content {
   padding-top: 5px;
   padding-bottom: 5px;
   border-bottom: 2px solid #222;
 }
 
-.webfs-explorer__list-content:hover {
+.remfs-explorer__list-content:hover {
   background-color: #ddd;
 }

@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>webFS explorer</title>
+    <title>remFS explorer</title>
     <link rel="stylesheet" type="text/css" href="./styles.css">
 
     <style>
@@ -22,11 +22,11 @@
     <div class='content'></div>
 
     <script type='module'>
-      import { WebFSExplorer } from './index.js';
+      import { RemFSExplorer } from './index.js';
 
-      const rootUrl = 'https://patchbay.pub/req/webfs';
+      const rootUrl = 'https://patchbay.pub/req/remfs';
 
-      const explorerEl = WebFSExplorer(rootUrl);
+      const explorerEl = RemFSExplorer(rootUrl);
       document.querySelector('.content').appendChild(explorerEl);
 
     </script>

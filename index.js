@@ -1,18 +1,18 @@
-const WebFSExplorer = (rootUrl) => {
+const RemFSExplorer = (rootUrl) => {
   const dom = document.createElement('div');
-  dom.classList.add('webfs-explorer');
+  dom.classList.add('remfs-explorer');
 
-  let webfsRoot;
+  let remfsRoot;
 
-  fetch(rootUrl + '/webfs.json')
+  fetch(rootUrl + '/remfs.json')
   .then(response => response.json())
-  .then(webfs => {
-    webfsRoot = webfs;
-    dom.appendChild(Directory(webfsRoot, rootUrl, []));
+  .then(remfs => {
+    remfsRoot = remfs;
+    dom.appendChild(Directory(remfsRoot, rootUrl, []));
   });
 
   dom.addEventListener('change-dir', (e) => {
-    let curDir = webfsRoot;
+    let curDir = remfsRoot;
     for (const part of e.detail.path) {
       curDir = curDir.children[part];
     }
@@ -22,10 +22,10 @@ const WebFSExplorer = (rootUrl) => {
       dom.replaceChild(newDirEl, dom.childNodes[0]);
     }
     else {
-      fetch(rootUrl + encodePath(e.detail.path) + '/webfs.json')
+      fetch(rootUrl + encodePath(e.detail.path) + '/remfs.json')
       .then(response => response.json())
-      .then(webfs => {
-        curDir.children = webfs.children;
+      .then(remfs => {
+        curDir.children = remfs.children;
         const newDirEl = Directory(curDir, rootUrl, e.detail.path)
         dom.replaceChild(newDirEl, dom.childNodes[0]);
       });
@@ -37,7 +37,7 @@ const WebFSExplorer = (rootUrl) => {
 
 const Directory = (dir, rootUrl, path) => {
   const dom = document.createElement('div');
-  dom.classList.add('webfs-explorer__directory');
+  dom.classList.add('remfs-explorer__directory');
 
   if (path.length > 0) {
     const parentPath = path.slice();
@@ -59,11 +59,11 @@ const Directory = (dir, rootUrl, path) => {
       if (child.type === 'dir') {
         // greedily get all children 1 level down
         if (!child.children) {
-          fetch(rootUrl + encodePath(childPath) + '/webfs.json')
+          fetch(rootUrl + encodePath(childPath) + '/remfs.json')
           .then(response => response.json())
-          .then(webfs => {
-            console.log("greedy", webfs);
-            child.children = webfs.children;
+          .then(remfs => {
+            console.log("greedy", remfs);
+            child.children = remfs.children;
           });
         }
       }
@@ -75,11 +75,11 @@ const Directory = (dir, rootUrl, path) => {
 
 const ListItem = (filename, item, rootUrl, path) => {
   const dom = document.createElement('a');
-  dom.classList.add('webfs-explorer__list-item');
+  dom.classList.add('remfs-explorer__list-item');
   dom.setAttribute('href', rootUrl + encodePath(path));
 
   const inner = document.createElement('div');
-  inner.classList.add('webfs-explorer__list-content');
+  inner.classList.add('remfs-explorer__list-content');
   inner.innerText = filename;
 
   dom.addEventListener('click', (e) => {
@@ -113,5 +113,5 @@ function parsePath(pathStr) {
 }
 
 export {
-  WebFSExplorer,
+  RemFSExplorer,
 };
