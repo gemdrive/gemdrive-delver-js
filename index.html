@@ -6,13 +6,9 @@
     <link rel="stylesheet" type="text/css" href="./styles.css">
 
     <style>
-      body {
-        display: flex;
-        justify-content: center;
-      }
-
       .content {
-        width: 640px;
+        margin: 0 auto;
+        max-width: 640px;
       }
     </style>
   </head>
@@ -24,9 +20,7 @@
     <script type='module'>
       import { RemFSExplorer } from './index.js';
 
-      const rootUrl = 'https://patchbay.pub/req/remfs';
-
-      const explorerEl = RemFSExplorer(rootUrl);
+      const explorerEl = RemFSExplorer();
       document.querySelector('.content').appendChild(explorerEl);
 
     </script>

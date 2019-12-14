@@ -1,6 +1,22 @@
-const RemFSExplorer = (rootUrl) => {
+const RemFSExplorer = (options) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-explorer');
+
+  const urlParams = new URLSearchParams(window.location.search);
+
+  let rootUrl;
+
+  if (urlParams.has('remfs-root')) {
+    rootUrl = urlParams.get('remfs-root');
+  }
+  else if (options && options.rootUrl) {
+    rootUrl = options.rootUrl;
+  }
+
+  if (!rootUrl) {
+    dom.innerText = "Error: No remfs-root provided";
+    return dom;
+  }
 
   let remfsRoot;
 
@@ -62,7 +78,6 @@ const Directory = (dir, rootUrl, path) => {
           fetch(rootUrl + encodePath(childPath) + '/remfs.json')
           .then(response => response.json())
           .then(remfs => {
-            console.log("greedy", remfs);
             child.children = remfs.children;
           });
         }
@@ -83,7 +98,6 @@ const ListItem = (filename, item, rootUrl, path) => {
   inner.innerText = filename;
 
   dom.addEventListener('click', (e) => {
-    console.log(item);
 
     if (item.type === 'dir') {
       e.preventDefault();
