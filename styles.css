@@ -1,3 +1,14 @@
+.remfs-delver__control-bar {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  border: 1px solid #000;
+  display: flex;
+  justify-content: right;
+  z-index: 1000;
+  font-size: 32px;
+}
+
 .remfs-delver__directory {
   border-top: 2px solid #222;
 }
@@ -7,6 +18,10 @@
   font-size: 18px;
   text-decoration: none;
   color: var(--color);
+}
+
+.remfs-delver__list-item-filename {
+  margin-left: 4px;
 }
 
 .remfs-delver__list-item:visited {

@@ -5,6 +5,10 @@ const RemFSDelver = (options) => {
   const urlParams = new URLSearchParams(window.location.search);
 
   let rootUrl;
+  let curDir;
+  let curPath;
+  let remfsRoot;
+  let layout = 'list';
 
   if (urlParams.has('remfs-root')) {
     rootUrl = urlParams.get('remfs-root');
@@ -18,42 +22,92 @@ const RemFSDelver = (options) => {
     return dom;
   }
 
-  let remfsRoot;
+  const controlBar = ControlBar();
+  dom.appendChild(controlBar.dom);
+
+  const dirContainer = document.createElement('div');
+  dirContainer.classList.add('remfs-delver__dir-container');
+  dom.appendChild(dirContainer);
+
 
   fetch(rootUrl + '/remfs.json')
   .then(response => response.json())
   .then(remfs => {
     remfsRoot = remfs;
-    dom.appendChild(Directory(remfsRoot, rootUrl, []));
+    curDir = remfsRoot;
+    curPath = [];
+
+    dirContainer.appendChild(Directory(remfsRoot, rootUrl, curPath, layout));
+
+    controlBar.dom.addEventListener('layout-list', (e) => {
+      layout = 'list';
+      updateDirEl();
+    });
+
+    controlBar.dom.addEventListener('layout-grid', (e) => {
+      layout = 'grid';
+      updateDirEl();
+    });
   });
 
-  dom.addEventListener('change-dir', (e) => {
-    let curDir = remfsRoot;
-    for (const part of e.detail.path) {
+  dirContainer.addEventListener('change-dir', (e) => {
+    curDir = remfsRoot;
+    curPath = e.detail.path;
+    for (const part of curPath) {
       curDir = curDir.children[part];
     }
 
     if (curDir.children) {
-      const newDirEl = Directory(curDir, rootUrl, e.detail.path)
-      dom.replaceChild(newDirEl, dom.childNodes[0]);
+      updateDirEl();
     }
     else {
-      fetch(rootUrl + encodePath(e.detail.path) + '/remfs.json')
+      fetch(rootUrl + encodePath(curPath) + '/remfs.json')
       .then(response => response.json())
       .then(remfs => {
         curDir.children = remfs.children;
-        const newDirEl = Directory(curDir, rootUrl, e.detail.path)
-        dom.replaceChild(newDirEl, dom.childNodes[0]);
+        updateDirEl();
       });
     }
   });
 
+  function updateDirEl() {
+    const newDirEl = Directory(curDir, rootUrl, curPath, layout)
+    dirContainer.replaceChild(newDirEl, dirContainer.childNodes[0]);
+  }
+
   return dom;
 };
 
-const Directory = (dir, rootUrl, path) => {
+const ControlBar = () => {
+  const dom = document.createElement('div');
+  dom.classList.add('remfs-delver__control-bar');
+
+  const listIconEl = document.createElement('ion-icon');
+  listIconEl.name = 'list';
+  listIconEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('layout-list', {
+      bubbles: true,
+    }));
+  });
+  dom.appendChild(listIconEl);
+  
+  const gridIconEl = document.createElement('ion-icon');
+  gridIconEl.name = 'apps';
+  gridIconEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('layout-grid', {
+      bubbles: true,
+    }));
+  });
+  dom.appendChild(gridIconEl);
+
+  return { dom };
+};
+
+const Directory = (dir, rootUrl, path, layout) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
+
+  console.log(layout);
 
   if (path.length > 0) {
     const parentPath = path.slice();
@@ -95,7 +149,22 @@ const ListItem = (filename, item, rootUrl, path) => {
 
   const inner = document.createElement('div');
   inner.classList.add('remfs-delver__list-content');
-  inner.innerText = filename;
+
+  const iconEl = document.createElement('ion-icon');
+
+  if (item.type === 'dir') {
+    iconEl.name = 'folder';
+  }
+  else {
+    iconEl.name = 'document';
+  }
+
+  inner.appendChild(iconEl);
+
+  const filenameEl = document.createElement('span');
+  filenameEl.classList.add('remfs-delver__list-item-filename');
+  filenameEl.innerText = filename;
+  inner.appendChild(filenameEl);
 
   dom.addEventListener('click', (e) => {
 
