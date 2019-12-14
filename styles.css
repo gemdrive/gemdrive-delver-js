@@ -1,24 +1,24 @@
-.remfs-explorer__directory {
+.remfs-delver__directory {
   border-top: 2px solid #222;
 }
 
-.remfs-explorer__list-item {
+.remfs-delver__list-item {
   --color: #222;
   font-size: 18px;
   text-decoration: none;
   color: var(--color);
 }
 
-.remfs-explorer__list-item:visited {
+.remfs-delver__list-item:visited {
   color: var(--color);
 }
 
-.remfs-explorer__list-content {
+.remfs-delver__list-content {
   padding-top: 5px;
   padding-bottom: 5px;
   border-bottom: 2px solid #222;
 }
 
-.remfs-explorer__list-content:hover {
+.remfs-delver__list-content:hover {
   background-color: #ddd;
 }

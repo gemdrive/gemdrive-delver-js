@@ -1,6 +1,6 @@
-const RemFSExplorer = (options) => {
+const RemFSDelver = (options) => {
   const dom = document.createElement('div');
-  dom.classList.add('remfs-explorer');
+  dom.classList.add('remfs-delver');
 
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -53,7 +53,7 @@ const RemFSExplorer = (options) => {
 
 const Directory = (dir, rootUrl, path) => {
   const dom = document.createElement('div');
-  dom.classList.add('remfs-explorer__directory');
+  dom.classList.add('remfs-delver__directory');
 
   if (path.length > 0) {
     const parentPath = path.slice();
@@ -90,11 +90,11 @@ const Directory = (dir, rootUrl, path) => {
 
 const ListItem = (filename, item, rootUrl, path) => {
   const dom = document.createElement('a');
-  dom.classList.add('remfs-explorer__list-item');
+  dom.classList.add('remfs-delver__list-item');
   dom.setAttribute('href', rootUrl + encodePath(path));
 
   const inner = document.createElement('div');
-  inner.classList.add('remfs-explorer__list-content');
+  inner.classList.add('remfs-delver__list-content');
   inner.innerText = filename;
 
   dom.addEventListener('click', (e) => {
@@ -127,5 +127,5 @@ function parsePath(pathStr) {
 }
 
 export {
-  RemFSExplorer,
+  RemFSDelver,
 };
