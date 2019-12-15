@@ -37,7 +37,7 @@ const RemFSDelver = (options) => {
     curDir = remfsRoot;
     curPath = [];
 
-    dirContainer.appendChild(Directory(remfsRoot, rootUrl, curPath, layout));
+    dirContainer.appendChild(Directory(remfsRoot, curDir, rootUrl, curPath, layout));
 
     controlBar.dom.addEventListener('layout-list', (e) => {
       layout = 'list';
@@ -71,7 +71,7 @@ const RemFSDelver = (options) => {
   });
 
   function updateDirEl() {
-    const newDirEl = Directory(curDir, rootUrl, curPath, layout)
+    const newDirEl = Directory(remfsRoot, curDir, rootUrl, curPath, layout)
     dirContainer.replaceChild(newDirEl, dirContainer.childNodes[0]);
   }
 
@@ -103,11 +103,9 @@ const ControlBar = () => {
   return { dom };
 };
 
-const Directory = (dir, rootUrl, path, layout) => {
+const Directory = (root, dir, rootUrl, path, layout) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
-
-  console.log(layout);
 
   if (path.length > 0) {
     const parentPath = path.slice();
@@ -115,7 +113,7 @@ const Directory = (dir, rootUrl, path, layout) => {
     const parentPlaceholder = {
       type: 'dir',
     };
-    const upDir = ListItem('..', parentPlaceholder, rootUrl, parentPath);
+    const upDir = ListItem(root, '..', parentPlaceholder, rootUrl, parentPath);
     dom.appendChild(upDir);
   }
 
@@ -123,26 +121,29 @@ const Directory = (dir, rootUrl, path, layout) => {
     for (const filename in dir.children) {
       const child = dir.children[filename];
       const childPath = path.concat(filename);
-      const childEl = ListItem(filename, child, rootUrl, childPath)
+      const childEl = ListItem(root, filename, child, rootUrl, childPath)
       dom.appendChild(childEl);
 
-      if (child.type === 'dir') {
-        // greedily get all children 1 level down
-        if (!child.children) {
-          fetch(rootUrl + encodePath(childPath) + '/remfs.json')
-          .then(response => response.json())
-          .then(remfs => {
-            child.children = remfs.children;
-          });
-        }
-      }
+      // TODO: This currently isn't being used, but probably should be
+      // eventually for performance. It's now defaulting to getting the
+      // entire tree on first load.
+      //if (child.type === 'dir') {
+      //  // greedily get all children 1 level down.
+      //  if (!child.children) {
+      //    fetch(rootUrl + encodePath(childPath) + '/remfs.json')
+      //    .then(response => response.json())
+      //    .then(remfs => {
+      //      child.children = remfs.children;
+      //    });
+      //  }
+      //}
     }
   }
 
   return dom;
 };
 
-const ListItem = (filename, item, rootUrl, path) => {
+const ListItem = (root, filename, item, rootUrl, path) => {
   const dom = document.createElement('a');
   dom.classList.add('remfs-delver__list-item');
   dom.setAttribute('href', rootUrl + encodePath(path));
@@ -150,16 +151,44 @@ const ListItem = (filename, item, rootUrl, path) => {
   const inner = document.createElement('div');
   inner.classList.add('remfs-delver__list-content');
 
-  const iconEl = document.createElement('ion-icon');
-
   if (item.type === 'dir') {
+    const iconEl = document.createElement('ion-icon');
     iconEl.name = 'folder';
+    inner.appendChild(iconEl);
   }
   else {
-    iconEl.name = 'document';
-  }
+    let thumb = false;
+    if (isImage(filename) && root.children.thumbnails) {
+      let curThumbItem = root.children.thumbnails;
 
-  inner.appendChild(iconEl);
+      for (const part of path) {
+        if (curThumbItem.children) {
+          curThumbItem = curThumbItem.children[part];
+        }
+        else {
+          console.log("thumb not found");
+          break;
+        }
+      }
+
+      if (curThumbItem) {
+        thumb = true;
+      }
+    }
+
+    if (thumb) {
+      const thumbEl = document.createElement('img');
+      thumbEl.classList.add('remfs-delver__thumb');
+
+      thumbEl.src = rootUrl + '/thumbnails' + encodePath(path);
+      inner.appendChild(thumbEl);
+    }
+    else {
+      const iconEl = document.createElement('ion-icon');
+      iconEl.name = 'document';
+      inner.appendChild(iconEl);
+    }
+  }
 
   const filenameEl = document.createElement('span');
   filenameEl.classList.add('remfs-delver__list-item-filename');
@@ -193,6 +222,11 @@ function encodePath(parts) {
 
 function parsePath(pathStr) {
   return pathStr.split('/').slice(1);
+}
+
+function isImage(pathStr) {
+  const lower = pathStr.toLowerCase(pathStr);
+  return lower.endsWith('.jpg') || lower.endsWith('.jpeg');
 }
 
 export {

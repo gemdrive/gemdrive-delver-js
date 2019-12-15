@@ -20,6 +20,10 @@
   color: var(--color);
 }
 
+.remfs-delver__thumb {
+  height: 64px;
+}
+
 .remfs-delver__list-item-filename {
   margin-left: 4px;
 }
