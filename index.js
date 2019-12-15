@@ -4,12 +4,12 @@ const RemFSDelver = (options) => {
 
   const urlParams = new URLSearchParams(window.location.search);
 
-  let rootUrl;
   let curDir;
   let curPath;
   let remfsRoot;
   let layout = 'list';
 
+  let rootUrl;
   if (urlParams.has('remfs-root')) {
     rootUrl = urlParams.get('remfs-root');
   }
@@ -22,8 +22,9 @@ const RemFSDelver = (options) => {
     return dom;
   }
 
-  const controlBar = ControlBar();
-  dom.appendChild(controlBar.dom);
+  // TODO: re-enable control bar once it does something useful.
+  //const controlBar = ControlBar();
+  //dom.appendChild(controlBar.dom);
 
   const dirContainer = document.createElement('div');
   dirContainer.classList.add('remfs-delver__dir-container');
@@ -39,15 +40,15 @@ const RemFSDelver = (options) => {
 
     dirContainer.appendChild(Directory(remfsRoot, curDir, rootUrl, curPath, layout));
 
-    controlBar.dom.addEventListener('layout-list', (e) => {
-      layout = 'list';
-      updateDirEl();
-    });
+    //controlBar.dom.addEventListener('layout-list', (e) => {
+    //  layout = 'list';
+    //  updateDirEl();
+    //});
 
-    controlBar.dom.addEventListener('layout-grid', (e) => {
-      layout = 'grid';
-      updateDirEl();
-    });
+    //controlBar.dom.addEventListener('layout-grid', (e) => {
+    //  layout = 'grid';
+    //  updateDirEl();
+    //});
   });
 
   dirContainer.addEventListener('change-dir', (e) => {
