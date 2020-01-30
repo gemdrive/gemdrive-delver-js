@@ -125,19 +125,16 @@ const Directory = (root, dir, rootUrl, path, layout) => {
       const childEl = ListItem(root, filename, child, rootUrl, childPath)
       dom.appendChild(childEl);
 
-      // TODO: This currently isn't being used, but probably should be
-      // eventually for performance. It's now defaulting to getting the
-      // entire tree on first load.
-      //if (child.type === 'dir') {
-      //  // greedily get all children 1 level down.
-      //  if (!child.children) {
-      //    fetch(rootUrl + encodePath(childPath) + '/remfs.json')
-      //    .then(response => response.json())
-      //    .then(remfs => {
-      //      child.children = remfs.children;
-      //    });
-      //  }
-      //}
+      if (child.type === 'dir') {
+        // greedily get all children 1 level down.
+        if (!child.children) {
+          fetch(rootUrl + encodePath(childPath) + '/remfs.json')
+          .then(response => response.json())
+          .then(remfs => {
+            child.children = remfs.children;
+          });
+        }
+      }
     }
   }
 
