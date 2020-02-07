@@ -1,4 +1,4 @@
-const RemFSDelver = (options) => {
+const RemFSDelver = async (options) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver');
 
@@ -25,55 +25,63 @@ const RemFSDelver = (options) => {
   // TODO: re-enable control bar once it does something useful.
   //const controlBar = ControlBar();
   //dom.appendChild(controlBar.dom);
+  
+  render();
 
-  const dirContainer = document.createElement('div');
-  dirContainer.classList.add('remfs-delver__dir-container');
-  dom.appendChild(dirContainer);
+  async function render() {
 
+    const remfsResponse = await fetch(rootUrl + '/remfs.json', {
+      headers: {
+        'Remfs-Token': localStorage.getItem('remfs-token'),
+      },
+    })
 
-  fetch(rootUrl + '/remfs.json')
-  .then(response => response.json())
-  .then(remfs => {
-    remfsRoot = remfs;
-    curDir = remfsRoot;
-    curPath = [];
+    console.log(remfsResponse);
 
-    dirContainer.appendChild(Directory(remfsRoot, curDir, rootUrl, curPath, layout));
+    if (remfsResponse.status === 200) {
+      remfsRoot = await remfsResponse.json();
+      curDir = remfsRoot;
+      curPath = [];
 
-    //controlBar.dom.addEventListener('layout-list', (e) => {
-    //  layout = 'list';
-    //  updateDirEl();
-    //});
+      const dirContainer = document.createElement('div');
+      dirContainer.classList.add('remfs-delver__dir-container');
+      dom.appendChild(dirContainer);
 
-    //controlBar.dom.addEventListener('layout-grid', (e) => {
-    //  layout = 'grid';
-    //  updateDirEl();
-    //});
-  });
+      dirContainer.appendChild(Directory(remfsRoot, curDir, rootUrl, curPath, layout));
 
-  dirContainer.addEventListener('change-dir', (e) => {
-    curDir = remfsRoot;
-    curPath = e.detail.path;
-    for (const part of curPath) {
-      curDir = curDir.children[part];
-    }
+      dirContainer.addEventListener('change-dir', (e) => {
+        curDir = remfsRoot;
+        curPath = e.detail.path;
+        for (const part of curPath) {
+          curDir = curDir.children[part];
+        }
 
-    if (curDir.children) {
-      updateDirEl();
-    }
-    else {
-      fetch(rootUrl + encodePath(curPath) + '/remfs.json')
-      .then(response => response.json())
-      .then(remfs => {
-        curDir.children = remfs.children;
-        updateDirEl();
+        if (curDir.children) {
+          updateDirEl();
+        }
+        else {
+          fetch(rootUrl + encodePath(curPath) + '/remfs.json')
+          .then(response => response.json())
+          .then(remfs => {
+            curDir.children = remfs.children;
+            updateDirEl();
+          });
+        }
       });
-    }
-  });
 
-  function updateDirEl() {
-    const newDirEl = Directory(remfsRoot, curDir, rootUrl, curPath, layout)
-    dirContainer.replaceChild(newDirEl, dirContainer.childNodes[0]);
+      function updateDirEl() {
+        const newDirEl = Directory(remfsRoot, curDir, rootUrl, curPath, layout)
+        dirContainer.replaceChild(newDirEl, dirContainer.childNodes[0]);
+      }
+    }
+    else if (remfsResponse.status === 403) {
+      const login = Login(rootUrl);
+      login.addEventListener('authenticated', (e) => {
+        console.log(e.detail);
+        localStorage.setItem('remfs-token', e.detail.token);
+      });
+      dom.appendChild(login);
+    }
   }
 
   return dom;
@@ -104,6 +112,63 @@ const ControlBar = () => {
   return { dom };
 };
 
+const Login = (rootUrl) => {
+  const dom = document.createElement('div');
+  dom.classList.add('remfs-delver__login');
+
+  const headerEl = document.createElement('h1');
+  headerEl.innerText = "Login";
+  dom.appendChild(headerEl);
+
+  const emailLabelEl = document.createElement('div');
+  emailLabelEl.innerText = "Email:";
+  dom.appendChild(emailLabelEl);
+
+  const emailEl = document.createElement('input');
+  emailEl.type = 'text';
+  dom.appendChild(emailEl);
+
+  const submitEl = document.createElement('button');
+  submitEl.innerText = 'Submit';
+  submitEl.addEventListener('click', (e) => {
+    fetch(rootUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'authenticate',
+        params: {
+          email: emailEl.value,
+        }
+      }),
+    })
+    .then(response => {
+      console.log(response);
+      if (response.status !== 200) {
+        throw new Error("Authentication failed");
+      }
+
+      return response.text();
+    })
+    .then(token => {
+      dom.dispatchEvent(new CustomEvent('authenticated', {
+        bubbles: true,
+        detail: {
+          token,
+        },
+      }));
+    })
+    .catch(e => {
+      console.error(e);
+    });
+  });
+  dom.appendChild(submitEl);
+
+  return dom;
+};
+
 const Directory = (root, dir, rootUrl, path, layout) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
@@ -128,7 +193,11 @@ const Directory = (root, dir, rootUrl, path, layout) => {
       if (child.type === 'dir') {
         // greedily get all children 1 level down.
         if (!child.children) {
-          fetch(rootUrl + encodePath(childPath) + '/remfs.json')
+          fetch(rootUrl + encodePath(childPath) + '/remfs.json', {
+            headers: {
+              'Remfs-Token': localStorage.getItem('remfs-token'),
+            },
+          })
           .then(response => response.json())
           .then(remfs => {
             child.children = remfs.children;

@@ -21,8 +21,10 @@
     <script type='module'>
       import { RemFSDelver } from './index.js';
 
-      const delverEl = RemFSDelver();
-      document.querySelector('.content').appendChild(delverEl);
+      (async () => {
+        const delverEl = await RemFSDelver();
+        document.querySelector('.content').appendChild(delverEl);
+      })();
 
     </script>
   </body>
