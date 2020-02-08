@@ -75,12 +75,13 @@ const RemFSDelver = async (options) => {
       }
     }
     else if (remfsResponse.status === 403) {
-      const login = Login(rootUrl);
-      login.addEventListener('authenticated', (e) => {
+      const loginEl = LoginView(rootUrl);
+      loginEl.addEventListener('authenticated', (e) => {
         console.log(e.detail);
         localStorage.setItem('remfs-token', e.detail.token);
+        location.reload();
       });
-      dom.appendChild(login);
+      dom.appendChild(loginEl);
     }
   }
 
@@ -112,59 +113,71 @@ const ControlBar = () => {
   return { dom };
 };
 
-const Login = (rootUrl) => {
+const LoginView = (rootUrl) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__login');
 
-  const headerEl = document.createElement('h1');
-  headerEl.innerText = "Login";
-  dom.appendChild(headerEl);
+  render();
 
-  const emailLabelEl = document.createElement('div');
-  emailLabelEl.innerText = "Email:";
-  dom.appendChild(emailLabelEl);
+  function render() {
 
-  const emailEl = document.createElement('input');
-  emailEl.type = 'text';
-  dom.appendChild(emailEl);
+    removeAllChildren(dom);
 
-  const submitEl = document.createElement('button');
-  submitEl.innerText = 'Submit';
-  submitEl.addEventListener('click', (e) => {
-    fetch(rootUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'authenticate',
-        params: {
-          email: emailEl.value,
-        }
-      }),
-    })
-    .then(response => {
-      console.log(response);
-      if (response.status !== 200) {
-        throw new Error("Authentication failed");
-      }
+    const headerEl = document.createElement('h1');
+    headerEl.innerText = "Login";
+    dom.appendChild(headerEl);
 
-      return response.text();
-    })
-    .then(token => {
-      dom.dispatchEvent(new CustomEvent('authenticated', {
-        bubbles: true,
-        detail: {
-          token,
+    const emailLabelEl = document.createElement('div');
+    emailLabelEl.innerText = "Email:";
+    dom.appendChild(emailLabelEl);
+
+    const emailEl = document.createElement('input');
+    emailEl.type = 'text';
+    dom.appendChild(emailEl);
+
+    const submitEl = document.createElement('button');
+    submitEl.innerText = 'Submit';
+    submitEl.addEventListener('click', (e) => {
+
+      dom.innerHTML = '<h1>Check your email to confirm login</h1>';
+
+      fetch(rootUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      }));
-    })
-    .catch(e => {
-      console.error(e);
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'authenticate',
+          params: {
+            email: emailEl.value,
+          }
+        }),
+      })
+      .then(response => {
+        console.log(response);
+        if (response.status !== 200) {
+          throw new Error("Authentication failed");
+        }
+
+        return response.text();
+      })
+      .then(token => {
+        dom.dispatchEvent(new CustomEvent('authenticated', {
+          bubbles: true,
+          detail: {
+            token,
+          },
+        }));
+      })
+      .catch(e => {
+        console.error(e);
+        alert("Login failed. Please try again");
+        render();
+      });
     });
-  });
-  dom.appendChild(submitEl);
+    dom.appendChild(submitEl);
+  }
 
   return dom;
 };
@@ -294,6 +307,12 @@ function parsePath(pathStr) {
 function isImage(pathStr) {
   const lower = pathStr.toLowerCase(pathStr);
   return lower.endsWith('.jpg') || lower.endsWith('.jpeg');
+}
+
+function removeAllChildren(el) {
+  while (el.firstChild) {
+    el.removeChild(el.firstChild);
+  }
 }
 
 export {
