@@ -41,3 +41,24 @@
 .remfs-delver__list-content:hover {
   background-color: #ddd;
 }
+
+.remfs-delver__preview {
+  display: flex;
+  justify-content: center;
+  background-color: #000;
+}
+
+.remfs-delver__preview-image {
+  height: 300px;
+}
+
+.remfs-delver-item__controls {
+  float: right;
+}
+
+.remfs-delver-open-external-button {
+  --color: #222;
+  font-size: 28px;
+  text-decoration: none;
+  color: var(--color);
+}

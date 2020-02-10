@@ -227,12 +227,20 @@ const Directory = (root, dir, rootUrl, path, layout) => {
 };
 
 const ListItem = async (root, filename, item, rootUrl, path) => {
-  const dom = document.createElement('a');
+  //const dom = document.createElement('a');
+  const dom = document.createElement('div');
   dom.classList.add('remfs-delver__list-item');
-  dom.setAttribute('href', rootUrl + encodePath(path));
+  //dom.setAttribute('href', rootUrl + encodePath(path));
+
+  let showPreview = false;
 
   const inner = document.createElement('div');
   inner.classList.add('remfs-delver__list-content');
+  dom.appendChild(inner);
+
+  const previewEl = document.createElement('div');
+  previewEl.classList.add('preview');
+  dom.appendChild(previewEl);
 
   if (item.type === 'dir') {
     const iconEl = document.createElement('ion-icon');
@@ -298,6 +306,15 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
   filenameEl.innerText = filename;
   inner.appendChild(filenameEl);
 
+
+  const itemControlsEl = document.createElement('span');
+  itemControlsEl.classList.add('remfs-delver-item__controls');
+  inner.appendChild(itemControlsEl);
+
+  if (item.type === 'file') {
+    itemControlsEl.appendChild(OpenExternalButton(rootUrl, path));
+  }
+
   dom.addEventListener('click', (e) => {
 
     if (item.type === 'dir') {
@@ -310,12 +327,65 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
       }));
     }
     else {
-      dom.setAttribute('target', '_blank');
+      //e.preventDefault();
+
+      showPreview = !showPreview;
+
+      if (showPreview) {
+        previewEl.appendChild(ImagePreview(rootUrl, path));
+      }
+      else {
+        removeAllChildren(previewEl);
+      }
+      //dom.setAttribute('target', '_blank');
     }
   });
 
-  dom.appendChild(inner);
+  return dom;
+};
 
+
+const ImagePreview = (rootUrl, path) => {
+
+  const dom = document.createElement('div');
+  dom.classList.add('remfs-delver__preview');
+
+  const imageEl = document.createElement('img');
+  imageEl.classList.add('remfs-delver__preview-image');
+  dom.appendChild(imageEl);
+
+  //const blob = await fetch(rootUrl + '/thumbnails' + encodePath(path), {
+  fetch(rootUrl + encodePath(path), {
+    method: 'POST',
+    headers: {
+      //'Remfs-Token': localStorage.getItem('remfs-token'),
+      'Content-Type': 'text/plain',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'read',
+      params: {
+        'remfs-token': localStorage.getItem('remfs-token'),
+      },
+    }),
+  })
+  .then(response => response.blob())
+  .then(blob => {
+    const url = URL.createObjectURL(blob);
+    imageEl.src = url;
+  })
+
+  return dom;
+};
+
+const OpenExternalButton = (rootUrl, path) => {
+  const dom = document.createElement('a');
+  dom.classList.add('remfs-delver-open-external-button');
+  dom.href = rootUrl + encodePath(path);
+  dom.setAttribute('target', '_blank');
+  const iconEl = document.createElement('ion-icon');
+  iconEl.name = 'open';
+  dom.appendChild(iconEl);
   return dom;
 };
 
