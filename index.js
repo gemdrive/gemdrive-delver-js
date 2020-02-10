@@ -4,6 +4,8 @@ const RemFSDelver = async (options) => {
 
   const urlParams = new URLSearchParams(window.location.search);
 
+  const previewDirName = 'previews';
+
   let curDir;
   let curPath;
   let remfsRoot;
@@ -248,31 +250,15 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
     inner.appendChild(iconEl);
   }
   else {
-    let thumb = false;
-    if (isImage(filename) && root.children.thumbnails) {
-      let curThumbItem = root.children.thumbnails;
 
-      for (const part of path) {
-        if (curThumbItem.children) {
-          curThumbItem = curThumbItem.children[part];
-        }
-        else {
-          console.log("thumb not found");
-          break;
-        }
-      }
+    const thumbUrl = getThumbUrl(root, rootUrl, path);
 
-      if (curThumbItem) {
-        thumb = true;
-      }
-    }
-
-    if (thumb) {
+    if (thumbUrl) {
       const thumbEl = document.createElement('img');
       thumbEl.classList.add('remfs-delver__thumb');
 
       //const blob = await fetch(rootUrl + '/thumbnails' + encodePath(path), {
-      fetch(rootUrl + '/thumbnails' + encodePath(path), {
+      fetch(thumbUrl, {
         method: 'POST',
         headers: {
           //'Remfs-Token': localStorage.getItem('remfs-token'),
@@ -332,7 +318,7 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
       showPreview = !showPreview;
 
       if (showPreview) {
-        previewEl.appendChild(ImagePreview(rootUrl, path));
+        previewEl.appendChild(ImagePreview(root, rootUrl, path));
       }
       else {
         removeAllChildren(previewEl);
@@ -345,7 +331,7 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
 };
 
 
-const ImagePreview = (rootUrl, path) => {
+const ImagePreview = (root, rootUrl, path) => {
 
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__preview');
@@ -354,26 +340,30 @@ const ImagePreview = (rootUrl, path) => {
   imageEl.classList.add('remfs-delver__preview-image');
   dom.appendChild(imageEl);
 
-  //const blob = await fetch(rootUrl + '/thumbnails' + encodePath(path), {
-  fetch(rootUrl + encodePath(path), {
-    method: 'POST',
-    headers: {
-      //'Remfs-Token': localStorage.getItem('remfs-token'),
-      'Content-Type': 'text/plain',
-    },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'read',
-      params: {
-        'remfs-token': localStorage.getItem('remfs-token'),
+  const previewUrl = getPreviewUrl(root, rootUrl, path);
+
+  if (previewUrl) {
+    //const blob = await fetch(rootUrl + '/thumbnails' + encodePath(path), {
+    fetch(previewUrl, {
+      method: 'POST',
+      headers: {
+        //'Remfs-Token': localStorage.getItem('remfs-token'),
+        'Content-Type': 'text/plain',
       },
-    }),
-  })
-  .then(response => response.blob())
-  .then(blob => {
-    const url = URL.createObjectURL(blob);
-    imageEl.src = url;
-  })
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'read',
+        params: {
+          'remfs-token': localStorage.getItem('remfs-token'),
+        },
+      }),
+    })
+    .then(response => response.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      imageEl.src = url;
+    })
+  }
 
   return dom;
 };
@@ -388,6 +378,38 @@ const OpenExternalButton = (rootUrl, path) => {
   dom.appendChild(iconEl);
   return dom;
 };
+
+function getThumbUrl(root, rootUrl, path) {
+  return getFileUrl(root, rootUrl, 'thumbnails', path);
+}
+
+function getPreviewUrl(root, rootUrl, path) {
+  return getFileUrl(root, rootUrl, 'previews', path);
+}
+
+function getFileUrl(root, rootUrl, type, path) {
+  const filename = path[path.length - 1];
+  if (isImage(filename) && root.children[type]) {
+    let curItem = root.children[type];
+
+    for (const part of path) {
+      if (curItem.children) {
+        curItem = curItem.children[part];
+      }
+      else {
+        console.log("file not found");
+        break;
+      }
+    }
+
+    if (curItem) {
+      const url = rootUrl + '/' + type + encodePath(path);
+      return url;
+    }
+  }
+
+  return null;
+}
 
 function encodePath(parts) {
   return '/' + parts.join('/');
