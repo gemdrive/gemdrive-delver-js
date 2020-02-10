@@ -244,6 +244,8 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
   previewEl.classList.add('preview');
   dom.appendChild(previewEl);
 
+  let thumbnailPromise;
+
   if (item.type === 'dir') {
     const iconEl = document.createElement('ion-icon');
     iconEl.name = 'folder';
@@ -258,7 +260,7 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
       thumbEl.classList.add('remfs-delver__thumb');
 
       //const blob = await fetch(rootUrl + '/thumbnails' + encodePath(path), {
-      fetch(thumbUrl, {
+      thumbnailPromise = fetch(thumbUrl, {
         method: 'POST',
         headers: {
           //'Remfs-Token': localStorage.getItem('remfs-token'),
@@ -273,7 +275,8 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
         }),
       })
       .then(response => response.blob())
-      .then(blob => {
+
+      thumbnailPromise.then(blob => {
         const url = URL.createObjectURL(blob);
         thumbEl.src = url;
       })
@@ -318,7 +321,7 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
       showPreview = !showPreview;
 
       if (showPreview) {
-        previewEl.appendChild(ImagePreview(root, rootUrl, path));
+        previewEl.appendChild(ImagePreview(root, rootUrl, path, thumbnailPromise));
       }
       else {
         removeAllChildren(previewEl);
@@ -331,7 +334,7 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
 };
 
 
-const ImagePreview = (root, rootUrl, path) => {
+const ImagePreview = (root, rootUrl, path, thumbnailPromise) => {
 
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__preview');
@@ -339,6 +342,15 @@ const ImagePreview = (root, rootUrl, path) => {
   const imageEl = document.createElement('img');
   imageEl.classList.add('remfs-delver__preview-image');
   dom.appendChild(imageEl);
+
+  let loaded = false;
+
+  thumbnailPromise.then((blob) => {
+    if (!loaded) {
+      const url = URL.createObjectURL(blob);
+      imageEl.src = url;
+    }
+  });
 
   const previewUrl = getPreviewUrl(root, rootUrl, path);
 
@@ -360,6 +372,7 @@ const ImagePreview = (root, rootUrl, path) => {
     })
     .then(response => response.blob())
     .then(blob => {
+      loaded = true;
       const url = URL.createObjectURL(blob);
       imageEl.src = url;
     })
