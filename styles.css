@@ -1,12 +1,19 @@
-.remfs-delver__control-bar {
+html {
+  font-family: Verdana;
+}
+
+.remfs-delver-control-bar {
   position: sticky;
   top: 0;
   background-color: #fff;
   border: 1px solid #000;
-  display: flex;
-  justify-content: right;
   z-index: 1000;
-  font-size: 32px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.remfs-delver-control-bar__buttons {
+  float: right;
 }
 
 .remfs-delver__directory {

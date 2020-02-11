@@ -24,9 +24,8 @@ const RemFSDelver = async (options) => {
     return dom;
   }
 
-  // TODO: re-enable control bar once it does something useful.
-  //const controlBar = ControlBar();
-  //dom.appendChild(controlBar.dom);
+  const controlBar = ControlBar();
+  dom.appendChild(controlBar.dom);
   
   render();
 
@@ -54,6 +53,7 @@ const RemFSDelver = async (options) => {
       dirContainer.addEventListener('change-dir', (e) => {
         curDir = remfsRoot;
         curPath = e.detail.path;
+        controlBar.onPathChange(curPath);
         for (const part of curPath) {
           curDir = curDir.children[part];
         }
@@ -92,27 +92,49 @@ const RemFSDelver = async (options) => {
 
 const ControlBar = () => {
   const dom = document.createElement('div');
-  dom.classList.add('remfs-delver__control-bar');
+  dom.classList.add('remfs-delver-control-bar');
 
-  const listIconEl = document.createElement('ion-icon');
-  listIconEl.name = 'list';
-  listIconEl.addEventListener('click', (e) => {
-    dom.dispatchEvent(new CustomEvent('layout-list', {
+  const curPathEl = document.createElement('span');
+  curPathEl.innerText = "/";
+  dom.appendChild(curPathEl);
+
+  const btnContainerEl = document.createElement('span');
+  btnContainerEl.classList.add('remfs-delver-control-bar__buttons');
+  dom.appendChild(btnContainerEl);
+
+  const uploadBtnEl = document.createElement('ion-icon');
+  uploadBtnEl.name = 'cloud-upload';
+  uploadBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('upload', {
       bubbles: true,
     }));
   });
-  dom.appendChild(listIconEl);
-  
-  const gridIconEl = document.createElement('ion-icon');
-  gridIconEl.name = 'apps';
-  gridIconEl.addEventListener('click', (e) => {
-    dom.dispatchEvent(new CustomEvent('layout-grid', {
-      bubbles: true,
-    }));
-  });
-  dom.appendChild(gridIconEl);
+  btnContainerEl.appendChild(uploadBtnEl);
 
-  return { dom };
+  function onPathChange(path) {
+    const pathStr = encodePath(path);
+    curPathEl.innerText = pathStr;
+  }
+
+  //const listIconEl = document.createElement('ion-icon');
+  //listIconEl.name = 'list';
+  //listIconEl.addEventListener('click', (e) => {
+  //  dom.dispatchEvent(new CustomEvent('layout-list', {
+  //    bubbles: true,
+  //  }));
+  //});
+  //dom.appendChild(listIconEl);
+  //
+  //const gridIconEl = document.createElement('ion-icon');
+  //gridIconEl.name = 'apps';
+  //gridIconEl.addEventListener('click', (e) => {
+  //  dom.dispatchEvent(new CustomEvent('layout-grid', {
+  //    bubbles: true,
+  //  }));
+  //});
+  //dom.appendChild(gridIconEl);
+
+  return { dom, onPathChange };
 };
 
 const LoginView = (rootUrl) => {
