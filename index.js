@@ -26,6 +26,60 @@ const RemFSDelver = async (options) => {
 
   const controlBar = ControlBar();
   dom.appendChild(controlBar.dom);
+
+
+  // File uploads
+  const uppie = new Uppie();
+
+  const handleFiles = async (e, formData, filenames) => {
+    for (const param of formData.entries()) {
+      const file = param[1];
+
+      console.log(file);
+
+      const uploadPath = [...curPath, file.name];
+      console.log(uploadPath);
+
+      fetch(rootUrl + encodePath(uploadPath), {
+        method: 'PUT',
+        headers: {
+          'Remfs-Token': localStorage.getItem('remfs-token'),
+        },
+        body: file,
+      })
+      .then(response => response.json())
+      .then(remfs => {
+        console.log(remfs);
+      })
+      .catch(e => {
+        console.error(e);
+      });
+
+      //const filenameParts = file.name.split('/');
+      //const dir = [...path, ...filenameParts.slice(0, -1)];
+      //const filename = filenameParts[filenameParts.length - 1];
+      //dom.dispatchEvent(new CustomEvent('upload-file', {
+      //  bubbles: true,
+      //  detail: {
+      //    path,
+      //    file,
+      //  },
+      //}));
+    }
+  };
+
+  const fileInput = InvisibleFileInput();
+  uppie(fileInput, handleFiles);
+  dom.appendChild(fileInput);
+  
+  const folderInput = InvisibleFolderInput();
+  uppie(folderInput, handleFiles);
+  dom.appendChild(folderInput);
+
+  controlBar.dom.addEventListener('upload', (e) => {
+    fileInput.click();
+  });
+
   
   render();
 
@@ -411,7 +465,31 @@ const OpenExternalButton = (rootUrl, path) => {
   const iconEl = document.createElement('ion-icon');
   iconEl.name = 'open';
   dom.appendChild(iconEl);
+
+  dom.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
   return dom;
+};
+
+const InvisibleFileInput = () => {
+  const fileInput = document.createElement('input');
+  fileInput.classList.add('upload-button__input');
+  fileInput.setAttribute('type', 'file');
+  fileInput.setAttribute('multiple', true);
+  return fileInput;
+};
+
+
+const InvisibleFolderInput = () => {
+  const folderInput = document.createElement('input');
+  folderInput.classList.add('upload-button__input');
+  folderInput.setAttribute('type', 'file');
+  folderInput.setAttribute('directory', true);
+  folderInput.setAttribute('webkitdirectory', true);
+  folderInput.setAttribute('mozdirectory', true);
+  return folderInput;
 };
 
 function getThumbUrl(root, rootUrl, path) {

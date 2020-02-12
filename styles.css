@@ -8,8 +8,13 @@ html {
   background-color: #fff;
   border: 1px solid #000;
   z-index: 1000;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: bold;
+}
+
+.upload-button__input {
+  display: none;
+  width: 0px;
 }
 
 .remfs-delver-control-bar__buttons {
