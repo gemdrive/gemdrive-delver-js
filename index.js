@@ -58,14 +58,12 @@ const RemFSDelver = async (options) => {
       .then(response => response.json())
       .then(remfs => {
 
-        // TODO: have backend return just the new item, not the parent dir?
-
         const currentItem = curDir.children[file.name];
-        curDir.children[file.name] = remfs.children[file.name];
+        curDir.children[file.name] = remfs;
 
         if (!currentItem) {
           // New item; update dom
-          onAddChild(file.name, remfs.children[file.name]);
+          onAddChild(file.name, remfs);
         }
       })
       .catch(e => {
@@ -321,8 +319,6 @@ const Directory = (root, dir, rootUrl, path, layout) => {
   }
 
   function onAddChild(name, child) {
-
-    console.log(name, child);
 
     const sortedNames = Object.keys(dir.children).sort(naturalSorter.compare);
 
