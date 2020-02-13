@@ -1,3 +1,9 @@
+// https://stackoverflow.com/a/38641281/943814
+const naturalSorter = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: 'base'
+});
+
 const RemFSDelver = async (options) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver');
@@ -10,6 +16,8 @@ const RemFSDelver = async (options) => {
   let curPath;
   let remfsRoot;
   let layout = 'list';
+  // TODO: don't really like having this be a global
+  let onAddChild = null;
 
   let rootUrl;
   if (urlParams.has('remfs-root')) {
@@ -49,22 +57,20 @@ const RemFSDelver = async (options) => {
       })
       .then(response => response.json())
       .then(remfs => {
-        console.log(remfs);
+
+        // TODO: have backend return just the new item, not the parent dir?
+
+        const currentItem = curDir.children[file.name];
+        curDir.children[file.name] = remfs.children[file.name];
+
+        if (!currentItem) {
+          // New item; update dom
+          onAddChild(file.name, remfs.children[file.name]);
+        }
       })
       .catch(e => {
         console.error(e);
       });
-
-      //const filenameParts = file.name.split('/');
-      //const dir = [...path, ...filenameParts.slice(0, -1)];
-      //const filename = filenameParts[filenameParts.length - 1];
-      //dom.dispatchEvent(new CustomEvent('upload-file', {
-      //  bubbles: true,
-      //  detail: {
-      //    path,
-      //    file,
-      //  },
-      //}));
     }
   };
 
@@ -102,7 +108,9 @@ const RemFSDelver = async (options) => {
       dirContainer.classList.add('remfs-delver__dir-container');
       dom.appendChild(dirContainer);
 
-      dirContainer.appendChild(Directory(remfsRoot, curDir, rootUrl, curPath, layout));
+      const dir = Directory(remfsRoot, curDir, rootUrl, curPath, layout);
+      onAddChild = dir.onAddChild;
+      dirContainer.appendChild(dir.dom);
 
       dirContainer.addEventListener('change-dir', (e) => {
         curDir = remfsRoot;
@@ -126,8 +134,9 @@ const RemFSDelver = async (options) => {
       });
 
       function updateDirEl() {
-        const newDirEl = Directory(remfsRoot, curDir, rootUrl, curPath, layout)
-        dirContainer.replaceChild(newDirEl, dirContainer.childNodes[0]);
+        const newDir = Directory(remfsRoot, curDir, rootUrl, curPath, layout)
+        onAddChild = newDir.onAddChild;
+        dirContainer.replaceChild(newDir.dom, dirContainer.childNodes[0]);
       }
     }
     else if (remfsResponse.status === 403) {
@@ -260,6 +269,16 @@ const LoginView = (rootUrl) => {
   return dom;
 };
 
+
+function genSortedItems(data) {
+  return Object.keys(data)
+    .sort(naturalSorter.compare)
+    .map(name => ({
+      name,
+      state: makeItemState(),
+    }));
+}
+
 const Directory = (root, dir, rootUrl, path, layout) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
@@ -275,7 +294,10 @@ const Directory = (root, dir, rootUrl, path, layout) => {
   }
 
   if (dir.children) {
-    for (const filename in dir.children) {
+    
+    const sortedNames = Object.keys(dir.children).sort(naturalSorter.compare);
+
+    for (const filename of sortedNames) {
       const child = dir.children[filename];
       const childPath = path.concat(filename);
       const childEl = ListItem(root, filename, child, rootUrl, childPath)
@@ -298,7 +320,26 @@ const Directory = (root, dir, rootUrl, path, layout) => {
     }
   }
 
-  return dom;
+  function onAddChild(name, child) {
+
+    console.log(name, child);
+
+    const sortedNames = Object.keys(dir.children).sort(naturalSorter.compare);
+
+    let index = sortedNames.indexOf(name);
+
+    if (index > -1) {
+      const childPath = path.concat(name);
+      dom.insertBefore(
+        ListItem(root, name, child, rootUrl, childPath),
+        dom.childNodes[index]);
+    }
+    else {
+      throw new Error("Directory DOM insert fail");
+    }
+  }
+
+  return { dom, onAddChild };
 };
 
 const ListItem = (root, filename, item, rootUrl, path) => {
