@@ -264,47 +264,44 @@ const Directory = (root, dir, rootUrl, path, layout) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
 
-  (async () => {
-    if (path.length > 0) {
-      const parentPath = path.slice();
-      parentPath.pop();
-      const parentPlaceholder = {
-        type: 'dir',
-      };
-      const upDir = await ListItem(root, '..', parentPlaceholder, rootUrl, parentPath);
-      dom.appendChild(upDir);
-    }
+  if (path.length > 0) {
+    const parentPath = path.slice();
+    parentPath.pop();
+    const parentPlaceholder = {
+      type: 'dir',
+    };
+    const upDir = ListItem(root, '..', parentPlaceholder, rootUrl, parentPath);
+    dom.appendChild(upDir);
+  }
 
-    if (dir.children) {
-      for (const filename in dir.children) {
-        const child = dir.children[filename];
-        const childPath = path.concat(filename);
-        const childEl = await ListItem(root, filename, child, rootUrl, childPath)
-        dom.appendChild(childEl);
+  if (dir.children) {
+    for (const filename in dir.children) {
+      const child = dir.children[filename];
+      const childPath = path.concat(filename);
+      const childEl = ListItem(root, filename, child, rootUrl, childPath)
+      dom.appendChild(childEl);
 
-        if (child.type === 'dir') {
-          // greedily get all children 1 level down.
-          if (!child.children) {
-            fetch(rootUrl + encodePath(childPath) + '/remfs.json', {
-              headers: {
-                'Remfs-Token': localStorage.getItem('remfs-token'),
-              },
-            })
-            .then(response => response.json())
-            .then(remfs => {
-              child.children = remfs.children;
-            });
-          }
+      if (child.type === 'dir') {
+        // greedily get all children 1 level down.
+        if (!child.children) {
+          fetch(rootUrl + encodePath(childPath) + '/remfs.json', {
+            headers: {
+              'Remfs-Token': localStorage.getItem('remfs-token'),
+            },
+          })
+          .then(response => response.json())
+          .then(remfs => {
+            child.children = remfs.children;
+          });
         }
       }
     }
-
-  })();
+  }
 
   return dom;
 };
 
-const ListItem = async (root, filename, item, rootUrl, path) => {
+const ListItem = (root, filename, item, rootUrl, path) => {
   //const dom = document.createElement('a');
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__list-item');
@@ -335,7 +332,6 @@ const ListItem = async (root, filename, item, rootUrl, path) => {
       const thumbEl = document.createElement('img');
       thumbEl.classList.add('remfs-delver__thumb');
 
-      //const blob = await fetch(rootUrl + '/thumbnails' + encodePath(path), {
       thumbnailPromise = fetch(thumbUrl, {
         method: 'POST',
         headers: {
