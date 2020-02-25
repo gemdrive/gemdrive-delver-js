@@ -184,12 +184,14 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise) => {
 
   let loaded = false;
 
-  thumbnailPromise.then((blob) => {
-    if (!loaded) {
-      const url = URL.createObjectURL(blob);
-      imageEl.src = url;
-    }
-  });
+  if (thumbnailPromise) {
+    thumbnailPromise.then((blob) => {
+      if (!loaded) {
+        const url = URL.createObjectURL(blob);
+        imageEl.src = url;
+      }
+    });
+  }
 
   const previewUrl = getPreviewUrl(root, rootUrl, path);
 
