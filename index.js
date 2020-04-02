@@ -1,4 +1,4 @@
-import { encodePath, removeAllChildren } from './utils.js';
+import { encodePath, parsePath, removeAllChildren } from './utils.js';
 import { Directory } from './components/directory.js';
 
 
@@ -82,23 +82,63 @@ const RemFSDelver = async (options) => {
     fileInput.click();
   });
 
+  window.addEventListener('hashchange', (e) => {
+    console.log(window.location.hash);
+  });
+
   
   render();
 
   async function render() {
 
-    const remfsResponse = await fetch(rootUrl + '/remfs.json', {
+    if (window.location.hash.startsWith('#/')) {
+      const pathStr = window.location.hash.slice(1);
+      curPath = parsePath(pathStr);
+      controlBar.onPathChange(curPath);
+    }
+    else {
+      curPath = [];
+      window.location.hash = '#' + encodePath(curPath);
+    }
+
+
+    console.log(curPath);
+
+    const remfsUrl = rootUrl + encodePath(curPath) + '/remfs.json';
+
+    const remfsResponse = await fetch(remfsUrl, {
       headers: {
         'Remfs-Token': localStorage.getItem('remfs-token'),
       },
     })
 
-    console.log(remfsResponse);
-
     if (remfsResponse.status === 200) {
-      remfsRoot = await remfsResponse.json();
+      remfsRoot = {
+        type: 'dir',
+        _incomplete: true,
+        children: {},
+      };
       curDir = remfsRoot;
-      curPath = [];
+      for (const part of curPath.slice(0, curPath.length - 1)) {
+        console.log(part);
+        curDir.children = {};
+        curDir.children[part] = {
+          name: part,
+          type: 'dir',
+          _incomplete: true,
+          children: {},
+        };
+        curDir = curDir.children[part];
+      }
+
+      const lastPart = curPath[curPath.length - 1];
+      curDir.children[lastPart] = await remfsResponse.json();
+      curDir = curDir.children[lastPart];
+
+      const isRoot = encodePath(curPath) === '/';
+      if (isRoot) {
+        remfsRoot = curDir;
+      }
 
       const dirContainer = document.createElement('div');
       dirContainer.classList.add('remfs-delver__dir-container');
@@ -111,16 +151,26 @@ const RemFSDelver = async (options) => {
       dirContainer.addEventListener('change-dir', (e) => {
         curDir = remfsRoot;
         curPath = e.detail.path;
+        console.log(curPath);
         controlBar.onPathChange(curPath);
         for (const part of curPath) {
+          console.log(curDir);
           curDir = curDir.children[part];
         }
 
-        if (curDir.children) {
+        window.location.hash = '#' + encodePath(curPath);
+
+        if (curDir.children && !curDir._incomplete) {
           updateDirEl();
         }
         else {
-          fetch(rootUrl + encodePath(curPath) + '/remfs.json')
+          const remfsUrl = rootUrl + encodePath(curPath) + '/remfs.json';
+          console.log(remfsUrl);
+          fetch(remfsUrl, {
+            headers: {
+              'Remfs-Token': localStorage.getItem('remfs-token'),
+            }
+          })
           .then(response => response.json())
           .then(remfs => {
             curDir.children = remfs.children;
@@ -143,6 +193,9 @@ const RemFSDelver = async (options) => {
         location.reload();
       });
       dom.appendChild(loginEl);
+    }
+    else {
+      console.error("bad response", remfsResponse.status);
     }
   }
 

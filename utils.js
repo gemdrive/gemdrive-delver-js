@@ -3,6 +3,9 @@ function encodePath(parts) {
 }
 
 function parsePath(pathStr) {
+  if (pathStr === '/') {
+    return [];
+  }
   return pathStr.split('/').slice(1);
 }
 
