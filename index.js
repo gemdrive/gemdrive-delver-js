@@ -30,6 +30,11 @@ const RemFSDelver = async (options) => {
     return dom;
   }
 
+  if (!rootUrl.startsWith('http')) {
+    const proto = options && options.secure ? 'https://' : 'http://';
+    rootUrl = proto + rootUrl;
+  }
+
   const controlBar = ControlBar();
   dom.appendChild(controlBar.dom);
 

@@ -24,7 +24,9 @@
       import { RemFSDelver } from './index.js';
 
       (async () => {
-        const delverEl = await RemFSDelver();
+        const delverEl = await RemFSDelver({
+          secure: false,
+        });
         document.querySelector('.content').appendChild(delverEl);
       })();
 
