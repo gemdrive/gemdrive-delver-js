@@ -18,15 +18,15 @@ const RemFSDelver = async (options) => {
   let onAddChild = null;
 
   let rootUrl;
-  if (urlParams.has('remfs-root')) {
-    rootUrl = urlParams.get('remfs-root');
+  if (urlParams.has('remfs')) {
+    rootUrl = urlParams.get('remfs');
   }
   else if (options && options.rootUrl) {
     rootUrl = options.rootUrl;
   }
 
   if (!rootUrl) {
-    dom.innerText = "Error: No remfs-root provided";
+    dom.innerText = "Error: No remFS URI provided (remfs=<remfs-uri> parameter)";
     return dom;
   }
 
