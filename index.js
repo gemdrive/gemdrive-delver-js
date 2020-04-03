@@ -1,4 +1,4 @@
-import { encodePath, removeAllChildren } from './utils.js';
+import { parsePath, encodePath, removeAllChildren } from './utils.js';
 import { Directory } from './components/directory.js';
 
 
@@ -17,23 +17,28 @@ const RemFSDelver = async (options) => {
   // TODO: don't really like having this be a global
   let onAddChild = null;
 
-  let rootUrl;
+  let rootUri;
   if (urlParams.has('remfs')) {
-    rootUrl = urlParams.get('remfs');
+    rootUri = urlParams.get('remfs');
   }
-  else if (options && options.rootUrl) {
-    rootUrl = options.rootUrl;
+  else if (options && options.rootUri) {
+    rootUri = options.rootUri;
   }
 
-  if (!rootUrl) {
+  if (!rootUri) {
     dom.innerText = "Error: No remFS URI provided (remfs=<remfs-uri> parameter)";
     return dom;
   }
 
+  let rootUrl = rootUri;
   if (!rootUrl.startsWith('http')) {
     const proto = options && options.secure ? 'https://' : 'http://';
     rootUrl = proto + rootUrl;
   }
+
+  const rootUrlObj = new URL(rootUrl);
+
+  history.pushState(null, '', window.location.pathname + '?remfs=' + rootUri);
 
   const controlBar = ControlBar();
   dom.appendChild(controlBar.dom);
@@ -120,6 +125,8 @@ const RemFSDelver = async (options) => {
         for (const part of curPath) {
           curDir = curDir.children[part];
         }
+
+        history.pushState(null, '', window.location.pathname + '?remfs=' + rootUri + encodePath(curPath));
 
         if (curDir.children) {
           updateDirEl();
