@@ -149,7 +149,7 @@ const RemFSDelver = async (options) => {
     }
     else if (remfsResponse.status === 403) {
       const loginEl = LoginView(rootUrl);
-      loginEl.addEventListener('authenticated', (e) => {
+      loginEl.addEventListener('authorized', (e) => {
         console.log(e.detail);
         localStorage.setItem('remfs-token', e.detail.token);
         location.reload();
@@ -243,22 +243,27 @@ const LoginView = (rootUrl) => {
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
-          method: 'authenticate',
+          method: 'authorize',
           params: {
             email: emailEl.value,
+            perms: {
+              "/": {
+                write: true,
+              },
+            },
           }
         }),
       })
       .then(response => {
         console.log(response);
         if (response.status !== 200) {
-          throw new Error("Authentication failed");
+          throw new Error("Authorization failed");
         }
 
         return response.text();
       })
       .then(token => {
-        dom.dispatchEvent(new CustomEvent('authenticated', {
+        dom.dispatchEvent(new CustomEvent('authorized', {
           bubbles: true,
           detail: {
             token,
