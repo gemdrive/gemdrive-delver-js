@@ -99,21 +99,8 @@ const ListItem = (root, filename, item, rootUrl, path) => {
       const thumbEl = document.createElement('img');
       thumbEl.classList.add('remfs-delver__thumb');
 
-      thumbnailPromise = fetch(thumbUrl, {
-        method: 'POST',
-        headers: {
-          //'Remfs-Token': localStorage.getItem('remfs-token'),
-          'Content-Type': 'text/plain',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'read',
-          params: {
-            'remfs-token': localStorage.getItem('remfs-token'),
-          },
-        }),
-      })
-      .then(response => response.blob())
+      thumbnailPromise = fetch(thumbUrl + '?token=' + window.insecureToken)
+      .then(response => response.blob());
 
       thumbnailPromise.then(blob => {
         const url = URL.createObjectURL(blob);
@@ -196,21 +183,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise) => {
   const previewUrl = getPreviewUrl(root, rootUrl, path);
 
   if (previewUrl) {
-    //const blob = await fetch(rootUrl + '/thumbnails' + encodePath(path), {
-    fetch(previewUrl, {
-      method: 'POST',
-      headers: {
-        //'Remfs-Token': localStorage.getItem('remfs-token'),
-        'Content-Type': 'text/plain',
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'read',
-        params: {
-          'remfs-token': localStorage.getItem('remfs-token'),
-        },
-      }),
-    })
+    fetch(previewUrl + '?token=' + window.insecureToken)
     .then(response => response.blob())
     .then(blob => {
       loaded = true;
