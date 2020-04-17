@@ -234,6 +234,37 @@ const OpenExternalButton = (rootUrl, path) => {
 
   dom.addEventListener('click', (e) => {
     e.stopPropagation();
+    e.preventDefault();
+
+    fetch(rootUrl, {
+      method: 'POST',
+      headers: {
+        'Remfs-Token': localStorage.getItem('remfs-token'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        method: 'authorize',
+        params: {
+          maxAge: 300, // valid for 5 minutes
+          perms: {
+            [encodePath(path)]: {
+              read: true,
+            }
+          }
+        },
+      }),
+    })
+    .then(response => response.text())
+    .then(token => {
+      // Create a temporary link which includes a token, click that link, then
+      // remove it.
+      const tokenLink = document.createElement('a');
+      tokenLink.href = rootUrl + encodePath(path) + '?token=' + token;
+      tokenLink.setAttribute('target', '_blank');
+      document.body.appendChild(tokenLink);
+      tokenLink.click();
+      document.body.removeChild(tokenLink);
+    });
   });
 
   return dom;
