@@ -106,6 +106,8 @@ const RemFSDelver = async (options) => {
     console.log(remfsResponse);
 
     if (remfsResponse.status === 200) {
+      await maintainInsecureToken(rootUrl, localStorage.getItem('remfs-token'));
+
       remfsRoot = await remfsResponse.json();
       curDir = remfsRoot;
       curPath = [];
@@ -305,6 +307,53 @@ const InvisibleFolderInput = () => {
   folderInput.setAttribute('mozdirectory', true);
   return folderInput;
 };
+
+// uses a long-lived token to regularly refresh a global short-lived, read-only
+// token. This is useful for things like setting image src URLs for protected
+// images.
+async function maintainInsecureToken(rootUrl, secureToken) {
+
+  async function refreshToken() {
+    return fetch(rootUrl + '?token=' + secureToken, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        method: 'authorize',
+        params: {
+          maxAge: 600,
+          perms: {
+            '/': {
+              read: true,
+            }
+          }
+        },
+      }),
+    })
+    .then(response => {
+      if (response.status !== 200) {
+        alert("failed to refresh token");
+      }
+
+      return response.text();
+    })
+    .then(token => {
+      // Create a temporary link which includes a token, click that link, then
+      // remove it.
+      window.insecureToken = token;
+
+      return token;
+    });
+  }
+
+  await refreshToken();
+
+  // refresh every 9 minutes. Valid for 10 minutes
+  setInterval(async () => {
+    await refreshToken();  
+  }, 540000);
+}
 
 
 export {
