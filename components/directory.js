@@ -127,6 +127,7 @@ const ListItem = (root, filename, item, rootUrl, path) => {
   inner.appendChild(itemControlsEl);
 
   if (item.type === 'file') {
+    itemControlsEl.appendChild(DownloadButton(rootUrl, path));
     itemControlsEl.appendChild(OpenExternalButton(rootUrl, path));
   }
 
@@ -198,6 +199,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise) => {
 
 const OpenExternalButton = (rootUrl, path) => {
   const dom = document.createElement('a');
+  dom.classList.add('remfs-delver-button');
   dom.classList.add('remfs-delver-open-external-button');
   dom.href = rootUrl + encodePath(path);
   dom.setAttribute('target', '_blank');
@@ -243,6 +245,54 @@ const OpenExternalButton = (rootUrl, path) => {
   return dom;
 };
 
+const DownloadButton = (rootUrl, path) => {
+  const dom = document.createElement('a');
+  dom.classList.add('remfs-delver-button');
+  dom.classList.add('remfs-delver-download-button');
+  dom.href = rootUrl + encodePath(path);
+  dom.setAttribute('target', '_blank');
+  const iconEl = document.createElement('ion-icon');
+  iconEl.name = 'download';
+  dom.appendChild(iconEl);
+
+  dom.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    fetch(rootUrl, {
+      method: 'POST',
+      headers: {
+        'Remfs-Token': localStorage.getItem('remfs-token'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        method: 'authorize',
+        params: {
+          maxAge: 10,
+          perms: {
+            [encodePath(path)]: {
+              read: true,
+            }
+          }
+        },
+      }),
+    })
+    .then(response => response.text())
+    .then(token => {
+      // Create a temporary link which includes a token, click that link, then
+      // remove it.
+      const tokenLink = document.createElement('a');
+      tokenLink.href = rootUrl + encodePath(path) + '?token=' + token + '&download=true';
+      tokenLink.setAttribute('target', '_blank');
+      tokenLink.setAttribute('download', path[path.length -1]);
+      document.body.appendChild(tokenLink);
+      tokenLink.click();
+      document.body.removeChild(tokenLink);
+    });
+  });
+
+  return dom;
+};
 
 function getThumbUrl(root, rootUrl, path) {
   return getFileUrl(root, rootUrl, 'thumbnails', path);
