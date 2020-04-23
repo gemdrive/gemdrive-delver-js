@@ -218,35 +218,14 @@ const OpenExternalButton = (rootUrl, path) => {
     e.stopPropagation();
     e.preventDefault();
 
-    fetch(rootUrl, {
-      method: 'POST',
-      headers: {
-        'Remfs-Token': localStorage.getItem('remfs-token'),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        method: 'authorize',
-        params: {
-          maxAge: 300, // valid for 5 minutes
-          perms: {
-            [authPathStr]: {
-              read: true,
-            }
-          }
-        },
-      }),
-    })
-    .then(response => response.text())
-    .then(token => {
-      // Create a temporary link which includes a token, click that link, then
-      // remove it.
-      const tokenLink = document.createElement('a');
-      tokenLink.href = rootUrl + encodePath(path) + '?token=' + token;
-      tokenLink.setAttribute('target', '_blank');
-      document.body.appendChild(tokenLink);
-      tokenLink.click();
-      document.body.removeChild(tokenLink);
-    });
+    // Create a temporary link which includes a token, click that link, then
+    // remove it.
+    const tokenLink = document.createElement('a');
+    tokenLink.href = rootUrl + encodePath(path) + '?token=' + window.insecureToken;
+    tokenLink.setAttribute('target', '_blank');
+    document.body.appendChild(tokenLink);
+    tokenLink.click();
+    document.body.removeChild(tokenLink);
   });
 
   return dom;
@@ -273,36 +252,15 @@ const DownloadButton = (rootUrl, path) => {
     e.stopPropagation();
     e.preventDefault();
 
-    fetch(rootUrl, {
-      method: 'POST',
-      headers: {
-        'Remfs-Token': localStorage.getItem('remfs-token'),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        method: 'authorize',
-        params: {
-          maxAge: 10,
-          perms: {
-            [authPathStr]: {
-              read: true,
-            }
-          }
-        },
-      }),
-    })
-    .then(response => response.text())
-    .then(token => {
-      // Create a temporary link which includes a token, click that link, then
-      // remove it.
-      const tokenLink = document.createElement('a');
-      tokenLink.href = rootUrl + encodePath(path) + '?token=' + token + '&download=true';
-      tokenLink.setAttribute('target', '_blank');
-      tokenLink.setAttribute('download', path[path.length -1]);
-      document.body.appendChild(tokenLink);
-      tokenLink.click();
-      document.body.removeChild(tokenLink);
-    });
+    // Create a temporary link which includes a token, click that link, then
+    // remove it.
+    const tokenLink = document.createElement('a');
+    tokenLink.href = rootUrl + encodePath(path) + '?&download=true&token=' + window.insecureToken;
+    tokenLink.setAttribute('target', '_blank');
+    tokenLink.setAttribute('download', path[path.length -1]);
+    document.body.appendChild(tokenLink);
+    tokenLink.click();
+    document.body.removeChild(tokenLink);
   });
 
   return dom;
