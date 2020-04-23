@@ -207,6 +207,13 @@ const OpenExternalButton = (rootUrl, path) => {
   iconEl.name = 'open';
   dom.appendChild(iconEl);
 
+  const rootPath = new URL(rootUrl).pathname;
+
+  let authPathStr = encodePath(path);
+  if (rootPath !== '/') {
+    authPathStr = decodeURIComponent(rootPath + '/' + authPathStr.slice(1));
+  }
+
   dom.addEventListener('click', (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -222,7 +229,7 @@ const OpenExternalButton = (rootUrl, path) => {
         params: {
           maxAge: 300, // valid for 5 minutes
           perms: {
-            [encodePath(path)]: {
+            [authPathStr]: {
               read: true,
             }
           }
@@ -255,6 +262,13 @@ const DownloadButton = (rootUrl, path) => {
   iconEl.name = 'download';
   dom.appendChild(iconEl);
 
+  const rootPath = new URL(rootUrl).pathname;
+
+  let authPathStr = encodePath(path);
+  if (rootPath !== '/') {
+    authPathStr = rootPath + '/' + authPathStr.slice(1);
+  }
+
   dom.addEventListener('click', (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -270,7 +284,7 @@ const DownloadButton = (rootUrl, path) => {
         params: {
           maxAge: 10,
           perms: {
-            [encodePath(path)]: {
+            [authPathStr]: {
               read: true,
             }
           }

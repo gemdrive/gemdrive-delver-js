@@ -103,8 +103,6 @@ const RemFSDelver = async (options) => {
       },
     })
 
-    console.log(remfsResponse);
-
     if (remfsResponse.status === 200) {
       await maintainInsecureToken(rootUrl, localStorage.getItem('remfs-token'));
 
