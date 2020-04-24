@@ -192,12 +192,12 @@ const ListItem = (root, filename, item, rootUrl, path) => {
 
       showPreview = !showPreview;
 
-      if (showPreview) {
-        previewEl.appendChild(ImagePreview(root, rootUrl, path, thumbnailPromise));
-      }
-      else {
-        removeAllChildren(previewEl);
-      }
+      //if (showPreview) {
+      //  previewEl.appendChild(ImagePreview(root, rootUrl, path, thumbnailPromise));
+      //}
+      //else {
+      //  removeAllChildren(previewEl);
+      //}
       //dom.setAttribute('target', '_blank');
     }
   });

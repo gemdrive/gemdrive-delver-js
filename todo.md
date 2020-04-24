@@ -6,3 +6,5 @@
 * Allow trailing slash on load
 * Maintain state of selected items across navigations
   * Will probably require passing in current render state
+* Create an async task list for tracking things like moves and uploads that
+  can take a long time.
