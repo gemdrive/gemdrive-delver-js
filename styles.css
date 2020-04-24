@@ -74,3 +74,9 @@ html {
   text-decoration: none;
   color: var(--color);
 }
+
+.remfs-delver__checkbox {
+  width: 20px;
+  height: 20px;
+  margin: 5px;
+}

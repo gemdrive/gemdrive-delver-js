@@ -1,5 +1,8 @@
 * Add smarter thumbnail finding
   * Should be able to put thumbnails in local directory, or any parent.
 * Don't use tokens for public files
-* Detect full path when authorizing
 * Don't request permanent tokens
+* Implement text previews
+* Allow trailing slash on load
+* Maintain state of selected items across navigations
+  * Will probably require passing in current render state

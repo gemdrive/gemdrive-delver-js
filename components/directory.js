@@ -65,7 +65,23 @@ const Directory = (root, dir, rootUrl, path, layout) => {
     }
   }
 
-  return { dom, onAddChild };
+  function onRemoveChild(name) {
+    const sortedNames = Object.keys(dir.children).sort(naturalSorter.compare);
+
+    let index = sortedNames.indexOf(name);
+
+    if (index > -1) {
+      if (path.length > 0) {
+        index += 1;
+      }
+      dom.removeChild(dom.childNodes[index]);
+    }
+    else {
+      throw new Error("Directory DOM removal fail");
+    }
+  }
+
+  return { dom, onAddChild, onRemoveChild };
 };
 
 const ListItem = (root, filename, item, rootUrl, path) => {
@@ -83,6 +99,35 @@ const ListItem = (root, filename, item, rootUrl, path) => {
   const previewEl = document.createElement('div');
   previewEl.classList.add('preview');
   dom.appendChild(previewEl);
+
+  if (filename !== '..') {
+    const checkboxEl = document.createElement('input');
+    checkboxEl.classList.add('remfs-delver__checkbox');
+    checkboxEl.setAttribute('type', 'checkbox');
+    checkboxEl.addEventListener('click', (e) => {
+
+      e.stopPropagation();
+
+      if (checkboxEl.checked) {
+        dom.dispatchEvent(new CustomEvent('item-selected', {
+          bubbles: true,
+          detail: {
+            path,
+          },
+        }));
+      }
+      else {
+        dom.dispatchEvent(new CustomEvent('item-deselected', {
+          bubbles: true,
+          detail: {
+            path,
+          },
+        }));
+      }
+    });
+
+    inner.appendChild(checkboxEl);
+  }
 
   let thumbnailPromise;
 

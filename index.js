@@ -16,6 +16,8 @@ const RemFSDelver = async (options) => {
   let layout = 'list';
   // TODO: don't really like having this be a global
   let onAddChild = null;
+  let onRemoveChild = null;
+  let selectedItems = {};
 
   let rootUri;
   if (urlParams.has('remfs')) {
@@ -92,6 +94,35 @@ const RemFSDelver = async (options) => {
     fileInput.click();
   });
 
+  const rootPath = new URL(rootUrl).pathname;
+
+  controlBar.dom.addEventListener('delete', (e) => {
+    const numItems = Object.keys(selectedItems).length;
+
+    const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
+    
+    if (doIt) {
+      for (const pathStr in selectedItems) {
+
+        const path = parsePath(pathStr);
+        const filename = path[path.length - 1];
+
+        fetch(rootUrl + pathStr + '?token=' + localStorage.getItem('remfs-token'), {
+          method: 'DELETE',
+        })
+        .then(() => {
+          onRemoveChild(filename);
+          delete curDir.children[filename];
+          selectedItems = {};
+          controlBar.onSelectedItemsChange(selectedItems);
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+      }
+    }
+  });
+
   
   render();
 
@@ -116,9 +147,12 @@ const RemFSDelver = async (options) => {
 
       const dir = Directory(remfsRoot, curDir, rootUrl, curPath, layout);
       onAddChild = dir.onAddChild;
+      onRemoveChild = dir.onRemoveChild;
       dirContainer.appendChild(dir.dom);
 
       dirContainer.addEventListener('change-dir', (e) => {
+        selectedItems = {};
+        controlBar.onSelectedItemsChange(selectedItems);
         curDir = remfsRoot;
         curPath = e.detail.path;
         controlBar.onPathChange(curPath);
@@ -141,9 +175,19 @@ const RemFSDelver = async (options) => {
         }
       });
 
+      dirContainer.addEventListener('item-selected', (e) => {
+        selectedItems[encodePath(e.detail.path)] = true;
+        controlBar.onSelectedItemsChange(selectedItems);
+      });
+      dirContainer.addEventListener('item-deselected', (e) => {
+        delete selectedItems[encodePath(e.detail.path)];
+        controlBar.onSelectedItemsChange(selectedItems);
+      });
+
       function updateDirEl() {
         const newDir = Directory(remfsRoot, curDir, rootUrl, curPath, layout)
         onAddChild = newDir.onAddChild;
+        onRemoveChild = newDir.onRemoveChild;
         dirContainer.replaceChild(newDir.dom, dirContainer.childNodes[0]);
       }
     }
@@ -182,9 +226,29 @@ const ControlBar = () => {
   });
   btnContainerEl.appendChild(uploadBtnEl);
 
+  const deleteBtnContainerEl = document.createElement('span');
+  btnContainerEl.appendChild(deleteBtnContainerEl);
+
+  const deleteBtnEl = document.createElement('ion-icon');
+  deleteBtnEl.name = 'close-circle';
+  deleteBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('delete', {
+      bubbles: true,
+    }));
+  });
+
   function onPathChange(path) {
     const pathStr = encodePath(path);
     curPathEl.innerText = pathStr;
+  }
+
+  function onSelectedItemsChange(selectedItems) {
+    if (Object.keys(selectedItems).length === 0) {
+      removeAllChildren(deleteBtnContainerEl);
+    }
+    else if (deleteBtnContainerEl.childNodes.length === 0) {
+      deleteBtnContainerEl.appendChild(deleteBtnEl);
+    }
   }
 
   //const listIconEl = document.createElement('ion-icon');
@@ -205,7 +269,7 @@ const ControlBar = () => {
   //});
   //dom.appendChild(gridIconEl);
 
-  return { dom, onPathChange };
+  return { dom, onPathChange, onSelectedItemsChange };
 };
 
 const LoginView = (rootUrl) => {
