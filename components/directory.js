@@ -34,7 +34,7 @@ const Directory = (root, dir, rootUrl, path, layout) => {
       if (child.type === 'dir') {
         // greedily get all children 1 level down.
         if (!child.children) {
-          fetch(rootUrl + encodePath(childPath) + '/remfs.json?token=' + localStorage.getItem('remfs-token'))
+          fetch(rootUrl + encodePath(childPath) + '/remfs.json?token=' + window.insecureToken)
           .then(response => response.json())
           .then(remfs => {
             child.children = remfs.children;
