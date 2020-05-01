@@ -107,7 +107,7 @@ const RemFSDelver = async (options) => {
         const path = parsePath(pathStr);
         const filename = path[path.length - 1];
 
-        fetch(rootUrl + pathStr + '?token=' + localStorage.getItem('remfs-token'), {
+        fetch(rootUrl + pathStr + '?access_token=' + localStorage.getItem('remfs-token'), {
           method: 'DELETE',
         })
         .then(() => {
@@ -128,7 +128,7 @@ const RemFSDelver = async (options) => {
 
   async function render() {
 
-    const remfsResponse = await fetch(rootUrl + '/remfs.json?token=' + localStorage.getItem('remfs-token'))
+    const remfsResponse = await fetch(rootUrl + '/remfs.json?access_token=' + localStorage.getItem('remfs-token'))
 
     if (remfsResponse.status === 200) {
       await maintainInsecureToken(rootUrl, localStorage.getItem('remfs-token'));
@@ -372,7 +372,7 @@ const InvisibleFolderInput = () => {
 async function maintainInsecureToken(rootUrl, secureToken) {
 
   async function refreshToken() {
-    return fetch(rootUrl + '?pauth-method=dummy&token=' + secureToken, {
+    return fetch(rootUrl + '?pauth-method=dummy&access_token=' + secureToken, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

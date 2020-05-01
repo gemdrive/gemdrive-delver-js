@@ -34,7 +34,7 @@ const Directory = (root, dir, rootUrl, path, layout) => {
       if (child.type === 'dir') {
         // greedily get all children 1 level down.
         if (!child.children) {
-          fetch(rootUrl + encodePath(childPath) + '/remfs.json?token=' + window.insecureToken)
+          fetch(rootUrl + encodePath(childPath) + '/remfs.json?access_token=' + window.insecureToken)
           .then(response => response.json())
           .then(remfs => {
             child.children = remfs.children;
@@ -140,7 +140,7 @@ const ListItem = (root, filename, item, rootUrl, path) => {
       const thumbEl = document.createElement('img');
       thumbEl.classList.add('remfs-delver__thumb');
 
-      thumbnailPromise = fetch(thumbUrl + '?token=' + window.insecureToken)
+      thumbnailPromise = fetch(thumbUrl + '?access_token=' + window.insecureToken)
       .then(response => response.blob());
 
       thumbnailPromise.then(blob => {
@@ -225,7 +225,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise) => {
   const previewUrl = getPreviewUrl(root, rootUrl, path);
 
   if (previewUrl) {
-    fetch(previewUrl + '?token=' + window.insecureToken)
+    fetch(previewUrl + '?access_token=' + window.insecureToken)
     .then(response => response.blob())
     .then(blob => {
       loaded = true;
@@ -255,20 +255,6 @@ const OpenExternalButton = (rootUrl, path) => {
     authPathStr = decodeURIComponent(rootPath + '/' + authPathStr.slice(1));
   }
 
-  dom.addEventListener('click', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-
-    // Create a temporary link which includes a token, click that link, then
-    // remove it.
-    const tokenLink = document.createElement('a');
-    tokenLink.href = rootUrl + encodePath(path) + '?token=' + window.insecureToken;
-    tokenLink.setAttribute('target', '_blank');
-    document.body.appendChild(tokenLink);
-    tokenLink.click();
-    document.body.removeChild(tokenLink);
-  });
-
   return dom;
 };
 
@@ -276,7 +262,7 @@ const DownloadButton = (rootUrl, path) => {
   const dom = document.createElement('a');
   dom.classList.add('remfs-delver-button');
   dom.classList.add('remfs-delver-download-button');
-  dom.href = rootUrl + encodePath(path);
+  dom.href = rootUrl + encodePath(path) + '?download=true';
   dom.setAttribute('target', '_blank');
   const iconEl = document.createElement('ion-icon');
   iconEl.name = 'download';
@@ -288,21 +274,6 @@ const DownloadButton = (rootUrl, path) => {
   if (rootPath !== '/') {
     authPathStr = rootPath + '/' + authPathStr.slice(1);
   }
-
-  dom.addEventListener('click', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-
-    // Create a temporary link which includes a token, click that link, then
-    // remove it.
-    const tokenLink = document.createElement('a');
-    tokenLink.href = rootUrl + encodePath(path) + '?&download=true&token=' + window.insecureToken;
-    tokenLink.setAttribute('target', '_blank');
-    tokenLink.setAttribute('download', path[path.length -1]);
-    document.body.appendChild(tokenLink);
-    tokenLink.click();
-    document.body.removeChild(tokenLink);
-  });
 
   return dom;
 };
