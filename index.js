@@ -296,7 +296,7 @@ const LoginView = (rootUrl) => {
 
       dom.innerHTML = '<h1>Check your email to confirm login</h1>';
 
-      fetch(rootUrl + '?pauth-method=authorize', {
+      fetch(rootUrl + '?pauth-method=dummy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -372,7 +372,7 @@ const InvisibleFolderInput = () => {
 async function maintainInsecureToken(rootUrl, secureToken) {
 
   async function refreshToken() {
-    return fetch(rootUrl + '?pauth-method=authorize&token=' + secureToken, {
+    return fetch(rootUrl + '?pauth-method=dummy&token=' + secureToken, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
