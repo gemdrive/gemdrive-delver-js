@@ -128,11 +128,7 @@ const RemFSDelver = async (options) => {
 
   async function render() {
 
-    const remfsResponse = await fetch(rootUrl + '/remfs.json', {
-      headers: {
-        'Remfs-Token': localStorage.getItem('remfs-token'),
-      },
-    })
+    const remfsResponse = await fetch(rootUrl + '/remfs.json?token=' + localStorage.getItem('remfs-token'))
 
     if (remfsResponse.status === 200) {
       await maintainInsecureToken(rootUrl, localStorage.getItem('remfs-token'));
@@ -300,7 +296,7 @@ const LoginView = (rootUrl) => {
 
       dom.innerHTML = '<h1>Check your email to confirm login</h1>';
 
-      fetch(rootUrl, {
+      fetch(rootUrl + '?pauth-method=authorize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -376,7 +372,7 @@ const InvisibleFolderInput = () => {
 async function maintainInsecureToken(rootUrl, secureToken) {
 
   async function refreshToken() {
-    return fetch(rootUrl + '?token=' + secureToken, {
+    return fetch(rootUrl + '?pauth-method=authorize&token=' + secureToken, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
