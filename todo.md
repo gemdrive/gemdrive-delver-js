@@ -1,3 +1,4 @@
+* Parse remfs path at startup and use that to set oauth scope
 * Add smarter thumbnail finding
   * Should be able to put thumbnails in local directory, or any parent.
 * Don't use tokens for public files

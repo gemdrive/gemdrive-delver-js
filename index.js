@@ -128,6 +128,14 @@ const RemFSDelver = async (options) => {
 
   async function render() {
 
+    if (urlParams.has('code')) {
+      const code = urlParams.get('code');
+      urlParams.delete('code');
+
+      const accessToken = await fetch(rootUrl + '?pauth-method=token&auth-code=' + code).then(r => r.text());
+      localStorage.setItem('remfs-token', accessToken);
+    }
+
     const remfsResponse = await fetch(rootUrl + '/remfs.json?access_token=' + localStorage.getItem('remfs-token'))
 
     if (remfsResponse.status === 200) {
@@ -188,13 +196,12 @@ const RemFSDelver = async (options) => {
       }
     }
     else if (remfsResponse.status === 403) {
-      const loginEl = LoginView(rootUrl);
-      loginEl.addEventListener('authorized', (e) => {
-        console.log(e.detail);
-        localStorage.setItem('remfs-token', e.detail.token);
-        location.reload();
-      });
-      dom.appendChild(loginEl);
+      console.log(rootUrl);
+
+      const clientId = window.location.origin;
+      const redirectUri = window.location.href;
+      const scope = '/:write';
+      window.location.href = rootUrl + `?pauth-method=authorize&response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
     }
   }
 
@@ -267,84 +274,6 @@ const ControlBar = () => {
 
   return { dom, onPathChange, onSelectedItemsChange };
 };
-
-const LoginView = (rootUrl) => {
-  const dom = document.createElement('div');
-  dom.classList.add('remfs-delver__login');
-
-  render();
-
-  function render() {
-
-    removeAllChildren(dom);
-
-    const headerEl = document.createElement('h1');
-    headerEl.innerText = "Login";
-    dom.appendChild(headerEl);
-
-    const emailLabelEl = document.createElement('div');
-    emailLabelEl.innerText = "Email:";
-    dom.appendChild(emailLabelEl);
-
-    const emailEl = document.createElement('input');
-    emailEl.type = 'text';
-    dom.appendChild(emailEl);
-
-    const submitEl = document.createElement('button');
-    submitEl.innerText = 'Submit';
-    submitEl.addEventListener('click', (e) => {
-
-      dom.innerHTML = '<h1>Check your email to confirm login</h1>';
-
-      fetch(rootUrl + '?pauth-method=dummy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'authorize',
-          params: {
-            email: emailEl.value,
-            perms: {
-              "/": {
-                write: true,
-              },
-            },
-          }
-        }),
-      })
-      .then(response => {
-        console.log(response);
-        if (response.status !== 200) {
-          throw new Error("Authorization failed");
-        }
-
-        return response.text();
-      })
-      .then(token => {
-        dom.dispatchEvent(new CustomEvent('authorized', {
-          bubbles: true,
-          detail: {
-            token,
-          },
-        }));
-      })
-      .catch(e => {
-        console.error(e);
-        alert("Login failed. Please try again");
-        render();
-      });
-    });
-    dom.appendChild(submitEl);
-  }
-
-  return dom;
-};
-
-
-
-
 
 
 const InvisibleFileInput = () => {
