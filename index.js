@@ -132,7 +132,7 @@ const RemFSDelver = async (options) => {
       const code = urlParams.get('code');
       urlParams.delete('code');
 
-      const accessToken = await fetch(rootUrl + '?pauth-method=token&auth-code=' + code).then(r => r.text());
+      const accessToken = await fetch(rootUrl + '?pauth-method=token&grant_type=authorization_code&code=' + code).then(r => r.text());
       localStorage.setItem('remfs-token', accessToken);
     }
 
