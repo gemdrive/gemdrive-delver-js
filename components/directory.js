@@ -7,7 +7,7 @@ const naturalSorter = new Intl.Collator(undefined, {
 });
 
 
-const Directory = (root, dir, rootUrl, path, layout) => {
+const Directory = (root, dir, rootUrl, path, layout, token) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
 
@@ -17,7 +17,7 @@ const Directory = (root, dir, rootUrl, path, layout) => {
     const parentPlaceholder = {
       type: 'dir',
     };
-    const upDir = ListItem(root, '..', parentPlaceholder, rootUrl, parentPath);
+    const upDir = ListItem(root, '..', parentPlaceholder, rootUrl, parentPath, token);
     dom.appendChild(upDir);
   }
 
@@ -28,13 +28,13 @@ const Directory = (root, dir, rootUrl, path, layout) => {
     for (const filename of sortedNames) {
       const child = dir.children[filename];
       const childPath = path.concat(filename);
-      const childEl = ListItem(root, filename, child, rootUrl, childPath)
+      const childEl = ListItem(root, filename, child, rootUrl, childPath, token)
       dom.appendChild(childEl);
 
       if (child.type === 'dir') {
         // greedily get all children 1 level down.
         if (!child.children) {
-          fetch(rootUrl + encodePath(childPath) + '/remfs.json?access_token=' + window.insecureToken)
+          fetch(rootUrl + encodePath(childPath) + '/remfs.json?access_token=' + token)
           .then(response => response.json())
           .then(remfs => {
             child.children = remfs.children;
@@ -53,7 +53,7 @@ const Directory = (root, dir, rootUrl, path, layout) => {
     if (index > -1) {
       const childPath = path.concat(name);
       dom.insertBefore(
-        ListItem(root, name, child, rootUrl, childPath),
+        ListItem(root, name, child, rootUrl, childPath, token),
         dom.childNodes[index]);
     }
     else {
@@ -80,7 +80,7 @@ const Directory = (root, dir, rootUrl, path, layout) => {
   return { dom, onAddChild, onRemoveChild };
 };
 
-const ListItem = (root, filename, item, rootUrl, path) => {
+const ListItem = (root, filename, item, rootUrl, path, token) => {
   //const dom = document.createElement('a');
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__list-item');
@@ -140,7 +140,7 @@ const ListItem = (root, filename, item, rootUrl, path) => {
       const thumbEl = document.createElement('img');
       thumbEl.classList.add('remfs-delver__thumb');
 
-      thumbnailPromise = fetch(thumbUrl + '?access_token=' + window.insecureToken)
+      thumbnailPromise = fetch(thumbUrl + '?access_token=' + token)
       .then(response => response.blob());
 
       thumbnailPromise.then(blob => {
@@ -202,7 +202,7 @@ const ListItem = (root, filename, item, rootUrl, path) => {
 };
 
 
-const ImagePreview = (root, rootUrl, path, thumbnailPromise) => {
+const ImagePreview = (root, rootUrl, path, thumbnailPromise, token) => {
 
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__preview');
@@ -225,7 +225,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise) => {
   const previewUrl = getPreviewUrl(root, rootUrl, path);
 
   if (previewUrl) {
-    fetch(previewUrl + '?access_token=' + window.insecureToken)
+    fetch(previewUrl + '?access_token=' + token)
     .then(response => response.blob())
     .then(blob => {
       loaded = true;

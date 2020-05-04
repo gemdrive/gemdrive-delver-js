@@ -139,7 +139,7 @@ const RemFSDelver = async (options) => {
     const remfsResponse = await fetch(rootUrl + '/remfs.json?access_token=' + localStorage.getItem('remfs-token'))
 
     if (remfsResponse.status === 200) {
-      await maintainInsecureToken(rootUrl, localStorage.getItem('remfs-token'));
+      //await maintainInsecureToken(rootUrl, localStorage.getItem('remfs-token'));
 
       remfsRoot = await remfsResponse.json();
       curDir = remfsRoot;
@@ -149,7 +149,7 @@ const RemFSDelver = async (options) => {
       dirContainer.classList.add('remfs-delver__dir-container');
       dom.appendChild(dirContainer);
 
-      const dir = Directory(remfsRoot, curDir, rootUrl, curPath, layout);
+      const dir = Directory(remfsRoot, curDir, rootUrl, curPath, layout, localStorage.getItem('remfs-token'));
       onAddChild = dir.onAddChild;
       onRemoveChild = dir.onRemoveChild;
       dirContainer.appendChild(dir.dom);
@@ -189,7 +189,7 @@ const RemFSDelver = async (options) => {
       });
 
       function updateDirEl() {
-        const newDir = Directory(remfsRoot, curDir, rootUrl, curPath, layout)
+        const newDir = Directory(remfsRoot, curDir, rootUrl, curPath, layout, localStorage.getItem('remfs-token'))
         onAddChild = newDir.onAddChild;
         onRemoveChild = newDir.onRemoveChild;
         dirContainer.replaceChild(newDir.dom, dirContainer.childNodes[0]);
@@ -298,49 +298,49 @@ const InvisibleFolderInput = () => {
 // uses a long-lived token to regularly refresh a global short-lived, read-only
 // token. This is useful for things like setting image src URLs for protected
 // images.
-async function maintainInsecureToken(rootUrl, secureToken) {
-
-  async function refreshToken() {
-    return fetch(rootUrl + '?pauth-method=dummy&access_token=' + secureToken, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        method: 'authorize',
-        params: {
-          maxAge: 600,
-          perms: {
-            '/': {
-              read: true,
-            }
-          }
-        },
-      }),
-    })
-    .then(response => {
-      if (response.status !== 200) {
-        alert("failed to refresh token");
-      }
-
-      return response.text();
-    })
-    .then(token => {
-      // Create a temporary link which includes a token, click that link, then
-      // remove it.
-      window.insecureToken = token;
-
-      return token;
-    });
-  }
-
-  await refreshToken();
-
-  // refresh every 9 minutes. Valid for 10 minutes
-  setInterval(async () => {
-    await refreshToken();  
-  }, 540000);
-}
+//async function maintainInsecureToken(rootUrl, secureToken) {
+//
+//  async function refreshToken() {
+//    return fetch(rootUrl + '?pauth-method=dummy&access_token=' + secureToken, {
+//      method: 'POST',
+//      headers: {
+//        'Content-Type': 'application/json',
+//      },
+//      body: JSON.stringify({
+//        method: 'authorize',
+//        params: {
+//          maxAge: 600,
+//          perms: {
+//            '/': {
+//              read: true,
+//            }
+//          }
+//        },
+//      }),
+//    })
+//    .then(response => {
+//      if (response.status !== 200) {
+//        alert("failed to refresh token");
+//      }
+//
+//      return response.text();
+//    })
+//    .then(token => {
+//      // Create a temporary link which includes a token, click that link, then
+//      // remove it.
+//      window.insecureToken = token;
+//
+//      return token;
+//    });
+//  }
+//
+//  await refreshToken();
+//
+//  // refresh every 9 minutes. Valid for 10 minutes
+//  setInterval(async () => {
+//    await refreshToken();  
+//  }, 540000);
+//}
 
 
 export {
