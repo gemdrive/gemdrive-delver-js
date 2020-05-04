@@ -19,6 +19,11 @@ const RemFSDelver = async (options) => {
   let onRemoveChild = null;
   let selectedItems = {};
 
+  if (urlParams.has('error')) {
+    alert("Authorization error. You probably don't have permission to view this path");
+    return;
+  }
+
   let rootUri;
   if (urlParams.has('remfs')) {
     rootUri = urlParams.get('remfs');
@@ -37,8 +42,6 @@ const RemFSDelver = async (options) => {
     const proto = options && options.secure ? 'https://' : 'http://';
     rootUrl = proto + rootUrl;
   }
-
-  const rootUrlObj = new URL(rootUrl);
 
   history.pushState(null, '', window.location.pathname + '?remfs=' + rootUri);
 
@@ -196,11 +199,9 @@ const RemFSDelver = async (options) => {
       }
     }
     else if (remfsResponse.status === 403) {
-      console.log(rootUrl);
-
       const clientId = window.location.origin;
       const redirectUri = window.location.href;
-      const scope = '/:write';
+      const scope = rootPath + ':write';
       window.location.href = rootUrl + `?pauth-method=authorize&response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
     }
   }
