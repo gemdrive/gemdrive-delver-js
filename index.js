@@ -61,11 +61,8 @@ const RemFSDelver = async (options) => {
       const uploadPath = [...curPath, file.name];
       console.log(uploadPath);
 
-      fetch(rootUrl + encodePath(uploadPath), {
+      fetch(rootUrl + encodePath(uploadPath) + '?access_token=' + localStorage.getItem('access_token'), {
         method: 'PUT',
-        headers: {
-          'Remfs-Token': localStorage.getItem('remfs-token'),
-        },
         body: file,
       })
       .then(response => response.json())
@@ -110,7 +107,7 @@ const RemFSDelver = async (options) => {
         const path = parsePath(pathStr);
         const filename = path[path.length - 1];
 
-        fetch(rootUrl + pathStr + '?access_token=' + localStorage.getItem('remfs-token'), {
+        fetch(rootUrl + pathStr + '?access_token=' + localStorage.getItem('access_token'), {
           method: 'DELETE',
         })
         .then(() => {
@@ -136,13 +133,13 @@ const RemFSDelver = async (options) => {
       urlParams.delete('code');
 
       const accessToken = await fetch(rootUrl + '?pauth-method=token&grant_type=authorization_code&code=' + code).then(r => r.text());
-      localStorage.setItem('remfs-token', accessToken);
+      localStorage.setItem('access_token', accessToken);
     }
 
-    const remfsResponse = await fetch(rootUrl + '/remfs.json?access_token=' + localStorage.getItem('remfs-token'))
+    const remfsResponse = await fetch(rootUrl + '/remfs.json?access_token=' + localStorage.getItem('access_token'))
 
     if (remfsResponse.status === 200) {
-      //await maintainInsecureToken(rootUrl, localStorage.getItem('remfs-token'));
+      //await maintainInsecureToken(rootUrl, localStorage.getItem('access_token'));
 
       remfsRoot = await remfsResponse.json();
       curDir = remfsRoot;
@@ -152,7 +149,7 @@ const RemFSDelver = async (options) => {
       dirContainer.classList.add('remfs-delver__dir-container');
       dom.appendChild(dirContainer);
 
-      const dir = Directory(remfsRoot, curDir, rootUrl, curPath, layout, localStorage.getItem('remfs-token'));
+      const dir = Directory(remfsRoot, curDir, rootUrl, curPath, layout, localStorage.getItem('access_token'));
       onAddChild = dir.onAddChild;
       onRemoveChild = dir.onRemoveChild;
       dirContainer.appendChild(dir.dom);
@@ -192,7 +189,7 @@ const RemFSDelver = async (options) => {
       });
 
       function updateDirEl() {
-        const newDir = Directory(remfsRoot, curDir, rootUrl, curPath, layout, localStorage.getItem('remfs-token'))
+        const newDir = Directory(remfsRoot, curDir, rootUrl, curPath, layout, localStorage.getItem('access_token'))
         onAddChild = newDir.onAddChild;
         onRemoveChild = newDir.onRemoveChild;
         dirContainer.replaceChild(newDir.dom, dirContainer.childNodes[0]);
