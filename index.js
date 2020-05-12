@@ -40,6 +40,12 @@ const RemFSDelver = async (options) => {
     }
   });
 
+  controlBar.dom.addEventListener('go-to-your-home', (e) => {
+    removeAllChildren(pageEl);
+    const fsList = FilesystemList(settings.filesystems);
+    pageEl.appendChild(fsList.dom);
+  });
+
   pageEl.addEventListener('select-filesystem', async (e) => {
     const fsUrl = e.detail.url;
     await navigate(fsUrl, []);

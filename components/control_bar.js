@@ -2,6 +2,15 @@ export const ControlBar = () => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver-control-bar');
 
+  const homeBtnEl = document.createElement('ion-icon');
+  dom.appendChild(homeBtnEl);
+  homeBtnEl.name = 'home';
+  homeBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('go-to-your-home', {
+      bubbles: true,
+    }));
+  });
+
   const curPathEl = document.createElement('span');
   curPathEl.innerText = "/";
   dom.appendChild(curPathEl);
