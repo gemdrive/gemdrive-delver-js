@@ -44,6 +44,7 @@ const RemFSDelver = async (options) => {
     removeAllChildren(pageEl);
     const fsList = FilesystemList(settings.filesystems);
     pageEl.appendChild(fsList.dom);
+    controlBar.onLocationChange('', []);
   });
 
   pageEl.addEventListener('select-filesystem', async (e) => {
@@ -69,6 +70,7 @@ const RemFSDelver = async (options) => {
       const dir = Directory(remfsRoot, curDir, fsUrl, path, null, token);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
+      controlBar.onLocationChange(fsUrl, path);
     }
     else if (remfsResponse.status === 403) {
       alert("Unauthorized");

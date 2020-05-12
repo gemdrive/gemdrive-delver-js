@@ -1,23 +1,36 @@
+import { encodePath } from '../utils.js';
+
+
 export const ControlBar = () => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver-control-bar');
 
+  const locationEl = document.createElement('span');
+  locationEl.classList.add('remfs-delver-control-bar__location');
+  dom.appendChild(locationEl);
+
+  const curFsEl = document.createElement('span');
+  curFsEl.classList.add('remfs-delver-control-bar__fs-url');
+  curFsEl.innerText = "[]";
+  locationEl.appendChild(curFsEl);
+
+  const curPathEl = document.createElement('span');
+  curPathEl.classList.add('remfs-delver-control-bar__path');
+  curPathEl.innerText = "/";
+  locationEl.appendChild(curPathEl);
+
+  const btnContainerEl = document.createElement('span');
+  btnContainerEl.classList.add('remfs-delver-control-bar__buttons');
+  dom.appendChild(btnContainerEl);
+
   const homeBtnEl = document.createElement('ion-icon');
-  dom.appendChild(homeBtnEl);
+  btnContainerEl.appendChild(homeBtnEl);
   homeBtnEl.name = 'home';
   homeBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('go-to-your-home', {
       bubbles: true,
     }));
   });
-
-  const curPathEl = document.createElement('span');
-  curPathEl.innerText = "/";
-  dom.appendChild(curPathEl);
-
-  const btnContainerEl = document.createElement('span');
-  btnContainerEl.classList.add('remfs-delver-control-bar__buttons');
-  dom.appendChild(btnContainerEl);
 
   const uploadBtnEl = document.createElement('ion-icon');
   uploadBtnEl.name = 'cloud-upload';
@@ -39,7 +52,9 @@ export const ControlBar = () => {
     }));
   });
 
-  function onPathChange(path) {
+  function onLocationChange(fsUrl, path) {
+    curFsEl.innerText = '[' + fsUrl + ']';
+
     const pathStr = encodePath(path);
     curPathEl.innerText = pathStr;
   }
@@ -71,5 +86,5 @@ export const ControlBar = () => {
   //});
   //dom.appendChild(gridIconEl);
 
-  return { dom, onPathChange, onSelectedItemsChange };
+  return { dom, onLocationChange, onSelectedItemsChange };
 };
