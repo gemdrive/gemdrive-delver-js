@@ -39,6 +39,8 @@ const RemFSDelver = async (options) => {
     localStorage.setItem('settings', JSON.stringify(settings));
   }
 
+  let selectedItems = {};
+
   const fsList = FilesystemList(settings.filesystems);
   pageEl.appendChild(fsList.dom);
 
@@ -62,6 +64,8 @@ const RemFSDelver = async (options) => {
     controlBar.onLocationChange('', []);
     curFsUrl = null;
     curPath = null;
+    selectedItems = {};
+    controlBar.onSelectedItemsChange(selectedItems);
     history.pushState(null, '', window.location.pathname);
   });
 
@@ -80,6 +84,8 @@ const RemFSDelver = async (options) => {
 
     curFsUrl = fsUrl;
     curPath = path;
+    selectedItems = {};
+    controlBar.onSelectedItemsChange(selectedItems);
 
     const fs = settings.filesystems[fsUrl];
     const remfsPath = [...path, 'remfs.json'];
@@ -159,47 +165,48 @@ const RemFSDelver = async (options) => {
     }
   });
 
+  pageEl.addEventListener('item-selected', (e) => {
+    const selectUrl = e.detail.fsUrl + encodePath(e.detail.path);
+    selectedItems[selectUrl] = true;
+    controlBar.onSelectedItemsChange(selectedItems);
+  });
+  pageEl.addEventListener('item-deselected', (e) => {
+    const selectUrl = e.detail.fsUrl + encodePath(e.detail.path);
+    delete selectedItems[selectUrl];
+    controlBar.onSelectedItemsChange(selectedItems);
+  });
+
+  controlBar.dom.addEventListener('delete', (e) => {
+    const numItems = Object.keys(selectedItems).length;
+
+    const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
+    
+    if (doIt) {
+      const fs = settings.filesystems[curFsUrl];
+
+      for (let url in selectedItems) {
+
+        if (fs.accessToken) {
+          url += '?access_token=' + fs.accessToken;
+        }
+
+        fetch(url, {
+          method: 'DELETE',
+        })
+        .then(() => {
+          selectedItems = {};
+          controlBar.onSelectedItemsChange(selectedItems);
+          navigate(curFsUrl, curPath);
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+      }
+    }
+  });
+
   return dom;
-
-
-  //controlBar.dom.addEventListener('delete', (e) => {
-  //  const numItems = Object.keys(selectedItems).length;
-
-  //  const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
-  //  
-  //  if (doIt) {
-  //    for (const pathStr in selectedItems) {
-
-  //      const path = parsePath(pathStr);
-  //      const filename = path[path.length - 1];
-
-  //      fetch(rootUrl + pathStr + '?access_token=' + localStorage.getItem('access_token'), {
-  //        method: 'DELETE',
-  //      })
-  //      .then(() => {
-  //        onRemoveChild(filename);
-  //        delete curDir.children[filename];
-  //        selectedItems = {};
-  //        controlBar.onSelectedItemsChange(selectedItems);
-  //      })
-  //      .catch((e) => {
-  //        console.error(e);
-  //      });
-  //    }
-  //  }
-  //});
-
-  //    dirContainer.addEventListener('item-selected', (e) => {
-  //      selectedItems[encodePath(e.detail.path)] = true;
-  //      controlBar.onSelectedItemsChange(selectedItems);
-  //    });
-  //    dirContainer.addEventListener('item-deselected', (e) => {
-  //      delete selectedItems[encodePath(e.detail.path)];
-  //      controlBar.onSelectedItemsChange(selectedItems);
-  //    });
 };
-
-
 
 
 const InvisibleFileInput = () => {

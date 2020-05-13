@@ -108,6 +108,7 @@ const ListItem = (root, filename, item, rootUrl, path, token) => {
         dom.dispatchEvent(new CustomEvent('item-selected', {
           bubbles: true,
           detail: {
+            fsUrl: rootUrl,
             path,
           },
         }));
@@ -116,6 +117,7 @@ const ListItem = (root, filename, item, rootUrl, path, token) => {
         dom.dispatchEvent(new CustomEvent('item-deselected', {
           bubbles: true,
           detail: {
+            fsUrl: rootUrl,
             path,
           },
         }));

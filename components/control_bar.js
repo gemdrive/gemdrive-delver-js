@@ -1,4 +1,4 @@
-import { encodePath } from '../utils.js';
+import { encodePath, removeAllChildren } from '../utils.js';
 
 
 export const ControlBar = () => {
