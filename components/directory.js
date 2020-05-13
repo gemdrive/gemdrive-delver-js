@@ -31,16 +31,16 @@ const Directory = (root, dir, rootUrl, path, layout, token) => {
       const childEl = ListItem(root, filename, child, rootUrl, childPath, token)
       dom.appendChild(childEl);
 
-      if (child.type === 'dir') {
-        // greedily get all children 1 level down.
-        if (!child.children) {
-          fetch(rootUrl + encodePath(childPath) + '/remfs.json?access_token=' + token)
-          .then(response => response.json())
-          .then(remfs => {
-            child.children = remfs.children;
-          });
-        }
-      }
+      //if (child.type === 'dir') {
+      //  // greedily get all children 1 level down.
+      //  if (!child.children) {
+      //    fetch(rootUrl + encodePath(childPath) + '/remfs.json?access_token=' + token)
+      //    .then(response => response.json())
+      //    .then(remfs => {
+      //      child.children = remfs.children;
+      //    });
+      //  }
+      //}
     }
   }
 
@@ -108,6 +108,7 @@ const ListItem = (root, filename, item, rootUrl, path, token) => {
         dom.dispatchEvent(new CustomEvent('item-selected', {
           bubbles: true,
           detail: {
+            fsUrl: rootUrl,
             path,
           },
         }));
@@ -116,6 +117,7 @@ const ListItem = (root, filename, item, rootUrl, path, token) => {
         dom.dispatchEvent(new CustomEvent('item-deselected', {
           bubbles: true,
           detail: {
+            fsUrl: rootUrl,
             path,
           },
         }));
@@ -176,9 +178,10 @@ const ListItem = (root, filename, item, rootUrl, path, token) => {
 
     if (item.type === 'dir') {
       e.preventDefault();
-      dom.dispatchEvent(new CustomEvent('change-dir', {
+      dom.dispatchEvent(new CustomEvent('select-dir', {
         bubbles: true,
         detail: {
+          fsUrl: rootUrl,
           path,
         },
       }));

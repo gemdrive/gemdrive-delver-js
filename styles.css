@@ -3,6 +3,8 @@ html {
 }
 
 .remfs-delver-control-bar {
+  display: flex;
+  justify-content: space-between;
   position: sticky;
   top: 0;
   background-color: #fff;
@@ -19,6 +21,20 @@ html {
 
 .remfs-delver-control-bar__buttons {
   float: right;
+}
+
+.remfs-delver-control-bar__location {
+  display: flex;
+  flex-direction: column;
+}
+.remfs-delver-control-bar__fs-url {
+  font-weight: normal;
+  font-size: 16px;
+  padding-left: 10px;
+}
+.remfs-delver-control-bar__path {
+  font-size: 22px;
+  padding-left: 5px;
 }
 
 .remfs-delver__directory {
