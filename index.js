@@ -206,36 +206,63 @@ const RemFSDelver = async (options) => {
     controlBar.onSelectedItemsChange(state.selectedItems);
   });
 
-  controlBar.dom.addEventListener('delete', (e) => {
+  controlBar.dom.addEventListener('copy', async (e) => {
 
-    let numItems = 0;
-    const deleteUrls = [];
-
-    for (const fsUrl in state.selectedItems) {
-
-      const fs = settings.filesystems[curFsUrl];
-
-      for (const itemKey in state.selectedItems[fsUrl]) {
-        numItems += 1;
-        let deleteUrl = fsUrl + itemKey;
-        if (fs.accessToken) {
-          deleteUrl += '?access_token' + fs.accessToken;
-        }
-        deleteUrls.push(deleteUrl);
-      }
-    }
+    const { numItems, selectedUrls } = buildSelectedUrls(state, settings, curFsUrl);
 
     const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
     
     if (doIt) {
-      for (const url of deleteUrls) {
-        fetch(url, {
-          method: 'DELETE',
-        })
-        .then(() => {
+
+      const fs = settings.filesystems[curFsUrl];
+
+      for (const url of selectedUrls) {
+        let copyCommandUrl = curFsUrl + encodePath(curPath) + '?remfs-method=remote-download&url=' + encodeURIComponent(url);
+        if (fs.accessToken) {
+          copyCommandUrl += '&access_token=' + fs.accessToken;
+        }
+
+        console.log(copyCommandUrl);
+        try {
+          await fetch(copyCommandUrl)
           state.selectedItems = {};
           controlBar.onSelectedItemsChange(state.selectedItems);
           navigate(curFsUrl, curPath);
+        }
+        catch (e) {
+          alert("Failed to copy");
+        }
+      }
+    } 
+  });
+
+  controlBar.dom.addEventListener('authorize', (e) => {
+    authorize(curFsUrl);
+  });
+
+  controlBar.dom.addEventListener('delete', (e) => {
+    
+    const { numItems, selectedUrls } = buildSelectedUrls(state, settings, curFsUrl);
+
+    const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
+    
+    if (doIt) {
+      for (const url of selectedUrls) {
+        fetch(url, {
+          method: 'DELETE',
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            state.selectedItems = {};
+            controlBar.onSelectedItemsChange(state.selectedItems);
+            navigate(curFsUrl, curPath);
+          }
+          else if (response.status === 403) {
+            alert("Failed delete. Unauthorized");
+          }
+          else {
+            alert("Failed delete for unknown reason.");
+          }
         })
         .catch((e) => {
           console.error(e);
@@ -246,6 +273,27 @@ const RemFSDelver = async (options) => {
 
   return dom;
 };
+
+function buildSelectedUrls(state, settings, curFsUrl) {
+  let numItems = 0;
+  const selectedUrls = [];
+
+  for (const fsUrl in state.selectedItems) {
+
+    const fs = settings.filesystems[curFsUrl];
+
+    for (const itemKey in state.selectedItems[fsUrl]) {
+      numItems += 1;
+      let selectedUrl = fsUrl + itemKey;
+      if (fs.accessToken) {
+        selectedUrl += '?access_token=' + fs.accessToken;
+      }
+      selectedUrls.push(selectedUrl);
+    }
+  }
+
+  return { numItems, selectedUrls };
+}
 
 
 const InvisibleFileInput = () => {

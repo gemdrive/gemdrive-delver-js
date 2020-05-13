@@ -32,6 +32,15 @@ export const ControlBar = () => {
     }));
   });
 
+  const authBtnEl = document.createElement('ion-icon');
+  btnContainerEl.appendChild(authBtnEl);
+  authBtnEl.name = 'key';
+  authBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('authorize', {
+      bubbles: true,
+    }));
+  });
+
   const uploadBtnEl = document.createElement('ion-icon');
   uploadBtnEl.name = 'cloud-upload';
   uploadBtnEl.addEventListener('click', (e) => {
@@ -40,6 +49,17 @@ export const ControlBar = () => {
     }));
   });
   btnContainerEl.appendChild(uploadBtnEl);
+
+  const copyBtnContainerEl = document.createElement('span');
+  btnContainerEl.appendChild(copyBtnContainerEl);
+
+  const copyBtnEl = document.createElement('ion-icon');
+  copyBtnEl.name = 'copy';
+  copyBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('copy', {
+      bubbles: true,
+    }));
+  });
 
   const deleteBtnContainerEl = document.createElement('span');
   btnContainerEl.appendChild(deleteBtnContainerEl);
@@ -60,11 +80,18 @@ export const ControlBar = () => {
   }
 
   function onSelectedItemsChange(selectedItems) {
-    if (Object.keys(selectedItems).length === 0) {
+    let numItems = 0;
+    for (const fsUrl in selectedItems) {
+      numItems += Object.keys(selectedItems[fsUrl]).length;
+    }
+
+    if (numItems === 0) {
       removeAllChildren(deleteBtnContainerEl);
+      removeAllChildren(copyBtnContainerEl);
     }
     else if (deleteBtnContainerEl.childNodes.length === 0) {
       deleteBtnContainerEl.appendChild(deleteBtnEl);
+      copyBtnContainerEl.appendChild(copyBtnEl);
     }
   }
 
