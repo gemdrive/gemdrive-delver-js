@@ -15,6 +15,10 @@ const RemFSDelver = async (options) => {
   pageEl.classList.add('remfs-delver__dir-container');
   dom.appendChild(pageEl);
 
+  const state = {
+    selectedItems: {},
+  };
+
   let settings = JSON.parse(localStorage.getItem('settings'));
   if (settings === null) {
     settings = {
@@ -39,8 +43,6 @@ const RemFSDelver = async (options) => {
     localStorage.setItem('settings', JSON.stringify(settings));
   }
 
-  let selectedItems = {};
-
   const fsList = FilesystemList(settings.filesystems);
   pageEl.appendChild(fsList.dom);
 
@@ -64,8 +66,8 @@ const RemFSDelver = async (options) => {
     controlBar.onLocationChange('', []);
     curFsUrl = null;
     curPath = null;
-    selectedItems = {};
-    controlBar.onSelectedItemsChange(selectedItems);
+    state.selectedItems = {};
+    controlBar.onSelectedItemsChange(state.selectedItems);
     history.pushState(null, '', window.location.pathname);
   });
 
@@ -84,8 +86,8 @@ const RemFSDelver = async (options) => {
 
     curFsUrl = fsUrl;
     curPath = path;
-    selectedItems = {};
-    controlBar.onSelectedItemsChange(selectedItems);
+    state.selectedItems = {};
+    controlBar.onSelectedItemsChange(state.selectedItems);
 
     const fs = settings.filesystems[fsUrl];
     const remfsPath = [...path, 'remfs.json'];
@@ -175,24 +177,24 @@ const RemFSDelver = async (options) => {
 
   pageEl.addEventListener('item-selected', (e) => {
     const selectUrl = e.detail.fsUrl + encodePath(e.detail.path);
-    selectedItems[selectUrl] = true;
-    controlBar.onSelectedItemsChange(selectedItems);
+    state.selectedItems[selectUrl] = true;
+    controlBar.onSelectedItemsChange(state.selectedItems);
   });
   pageEl.addEventListener('item-deselected', (e) => {
     const selectUrl = e.detail.fsUrl + encodePath(e.detail.path);
-    delete selectedItems[selectUrl];
-    controlBar.onSelectedItemsChange(selectedItems);
+    delete state.selectedItems[selectUrl];
+    controlBar.onSelectedItemsChange(state.selectedItems);
   });
 
   controlBar.dom.addEventListener('delete', (e) => {
-    const numItems = Object.keys(selectedItems).length;
+    const numItems = Object.keys(state.selectedItems).length;
 
     const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
     
     if (doIt) {
       const fs = settings.filesystems[curFsUrl];
 
-      for (let url in selectedItems) {
+      for (let url in state.selectedItems) {
 
         if (fs.accessToken) {
           url += '?access_token=' + fs.accessToken;
@@ -202,8 +204,8 @@ const RemFSDelver = async (options) => {
           method: 'DELETE',
         })
         .then(() => {
-          selectedItems = {};
-          controlBar.onSelectedItemsChange(selectedItems);
+          state.selectedItems = {};
+          controlBar.onSelectedItemsChange(state.selectedItems);
           navigate(curFsUrl, curPath);
         })
         .catch((e) => {
