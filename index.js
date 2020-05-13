@@ -16,11 +16,26 @@ const RemFSDelver = async (options) => {
   dom.appendChild(pageEl);
 
   let settings = JSON.parse(localStorage.getItem('settings'));
-
   if (settings === null) {
     settings = {
       filesystems: {},
     };
+    localStorage.setItem('settings', JSON.stringify(settings));
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('code') && urlParams.has('fs')) {
+    const code = urlParams.get('code');
+    urlParams.delete('code');
+
+    history.pushState(null, '', window.location.pathname + '?' + decodeURIComponent(urlParams.toString()));
+
+    const fsUrl = urlParams.get('fs');
+
+    const accessToken = await fetch(fsUrl + '?pauth-method=token&grant_type=authorization_code&code=' + code)
+      .then(r => r.text());
+
+    settings.filesystems[fsUrl].accessToken = accessToken;
     localStorage.setItem('settings', JSON.stringify(settings));
   }
 
@@ -47,6 +62,7 @@ const RemFSDelver = async (options) => {
     controlBar.onLocationChange('', []);
     curFsUrl = null;
     curPath = null;
+    history.pushState(null, '', window.location.pathname);
   });
 
   pageEl.addEventListener('select-filesystem', async (e) => {
@@ -66,21 +82,30 @@ const RemFSDelver = async (options) => {
     curPath = path;
 
     const fs = settings.filesystems[fsUrl];
-    const token = localStorage.getItem('access_token');
     const remfsPath = [...path, 'remfs.json'];
-    const reqUrl = fsUrl + encodePath(remfsPath) + '?access_token=' + token;
+    let reqUrl = fsUrl + encodePath(remfsPath);
+    if (fs.accessToken) {
+      reqUrl += '?access_token=' + fs.accessToken;
+    }
+
     const remfsResponse = await fetch(reqUrl)
 
     if (remfsResponse.status === 200) {
       const remfsRoot = await remfsResponse.json();
       const curDir = remfsRoot;
-      const dir = Directory(remfsRoot, curDir, fsUrl, path, null, token);
+      const dir = Directory(remfsRoot, curDir, fsUrl, path, null, fs.accessToken);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
       controlBar.onLocationChange(fsUrl, path);
+
+      history.pushState(null, '', window.location.pathname + `?fs=${fsUrl}&path=${encodePath(path)}`);
     }
     else if (remfsResponse.status === 403) {
-      alert("Unauthorized");
+      const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
+
+      if (doAuth) {
+        authorize(fsUrl);
+      }
     }
   }
 
@@ -92,10 +117,14 @@ const RemFSDelver = async (options) => {
       const file = param[1];
 
       const uploadPath = [...curPath, file.name];
-      const uploadUrl = curFsUrl + encodePath(uploadPath);
-      console.log(uploadUrl);
+      let uploadUrl = curFsUrl + encodePath(uploadPath);
 
-      fetch(uploadUrl + '?access_token=' + localStorage.getItem('access_token'), {
+      const fs = settings.filesystems[curFsUrl];
+      if (fs.accessToken) {
+        uploadUrl += '?access_token=' + fs.accessToken;
+      }
+
+      fetch(uploadUrl, {
         method: 'PUT',
         body: file,
       })
@@ -106,7 +135,12 @@ const RemFSDelver = async (options) => {
         navigate(curFsUrl, curPath);
       })
       .catch(e => {
-        console.error(e);
+        
+        const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
+
+        if (doAuth) {
+          authorize(curFsUrl);
+        }
       });
     }
   };
@@ -389,6 +423,13 @@ async function validateUrl(url, settings) {
   }
 
   return remfsUrl;
+}
+
+function authorize(fsUrl) {
+  const clientId = window.location.origin;
+  const redirectUri = encodeURIComponent(window.location.href);
+  const scope = '/:write';
+  window.location.href = fsUrl + `?pauth-method=authorize&response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
 }
 
 
