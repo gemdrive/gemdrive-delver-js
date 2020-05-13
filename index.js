@@ -27,7 +27,7 @@ const RemFSDelver = async (options) => {
   const fsList = FilesystemList(settings.filesystems);
   pageEl.appendChild(fsList.dom);
 
-  fsList.dom.addEventListener('add-filesystem', async (e) => {
+  pageEl.addEventListener('add-filesystem', async (e) => {
 
     const remfsUrl = await validateUrl(e.detail.url, settings);
     
@@ -45,6 +45,8 @@ const RemFSDelver = async (options) => {
     const fsList = FilesystemList(settings.filesystems);
     pageEl.appendChild(fsList.dom);
     controlBar.onLocationChange('', []);
+    curFsUrl = null;
+    curPath = null;
   });
 
   pageEl.addEventListener('select-filesystem', async (e) => {
@@ -56,7 +58,12 @@ const RemFSDelver = async (options) => {
     await navigate(e.detail.fsUrl, e.detail.path);
   });
 
+  let curFsUrl;
+  let curPath;
   async function navigate(fsUrl, path) {
+
+    curFsUrl = fsUrl;
+    curPath = path;
 
     const fs = settings.filesystems[fsUrl];
     const token = localStorage.getItem('access_token');
@@ -76,6 +83,47 @@ const RemFSDelver = async (options) => {
       alert("Unauthorized");
     }
   }
+
+  // File uploads
+  const uppie = new Uppie();
+
+  const handleFiles = async (e, formData, filenames) => {
+    for (const param of formData.entries()) {
+      const file = param[1];
+
+      const uploadPath = [...curPath, file.name];
+      const uploadUrl = curFsUrl + encodePath(uploadPath);
+      console.log(uploadUrl);
+
+      fetch(uploadUrl + '?access_token=' + localStorage.getItem('access_token'), {
+        method: 'PUT',
+        body: file,
+      })
+      .then(response => response.json())
+      .then(remfs => {
+        // TODO: This is a hack. Will probably need to dynamically update
+        // at some point.
+        navigate(curFsUrl, curPath);
+      })
+      .catch(e => {
+        console.error(e);
+      });
+    }
+  };
+
+  const fileInput = InvisibleFileInput();
+  uppie(fileInput, handleFiles);
+  dom.appendChild(fileInput);
+  
+  const folderInput = InvisibleFolderInput();
+  uppie(folderInput, handleFiles);
+  dom.appendChild(folderInput);
+
+  controlBar.dom.addEventListener('upload', (e) => {
+    if (curFsUrl) {
+      fileInput.click();
+    }
+  });
 
   return dom;
 
