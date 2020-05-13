@@ -7,7 +7,7 @@ const naturalSorter = new Intl.Collator(undefined, {
 });
 
 
-const Directory = (root, dir, rootUrl, path, layout, token) => {
+const Directory = (root, dir, rootUrl, path, token) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
 

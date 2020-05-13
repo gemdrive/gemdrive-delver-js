@@ -101,7 +101,7 @@ const RemFSDelver = async (options) => {
     if (remfsResponse.status === 200) {
       const remfsRoot = await remfsResponse.json();
       const curDir = remfsRoot;
-      const dir = Directory(remfsRoot, curDir, fsUrl, path, null, fs.accessToken);
+      const dir = Directory(remfsRoot, curDir, fsUrl, path, fs.accessToken);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
       controlBar.onLocationChange(fsUrl, path);
