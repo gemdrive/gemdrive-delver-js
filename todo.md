@@ -9,3 +9,5 @@
   can take a long time.
 * Add ability to force login even if top-level doesn't require it.
 * Add ability to generate capability URLs for apps like VLC.
+* Handle selecting both parent and child items, ie don't want to attempt to
+  delete a child if the parent has already be deleted.

@@ -207,19 +207,28 @@ const RemFSDelver = async (options) => {
   });
 
   controlBar.dom.addEventListener('delete', (e) => {
-    const numItems = Object.keys(state.selectedItems).length;
+
+    let numItems = 0;
+    const deleteUrls = [];
+
+    for (const fsUrl in state.selectedItems) {
+
+      const fs = settings.filesystems[curFsUrl];
+
+      for (const itemKey in state.selectedItems[fsUrl]) {
+        numItems += 1;
+        let deleteUrl = fsUrl + itemKey;
+        if (fs.accessToken) {
+          deleteUrl += '?access_token' + fs.accessToken;
+        }
+        deleteUrls.push(deleteUrl);
+      }
+    }
 
     const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
     
     if (doIt) {
-      const fs = settings.filesystems[curFsUrl];
-
-      for (let url in state.selectedItems) {
-
-        if (fs.accessToken) {
-          url += '?access_token=' + fs.accessToken;
-        }
-
+      for (const url of deleteUrls) {
         fetch(url, {
           method: 'DELETE',
         })
