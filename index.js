@@ -115,6 +115,14 @@ const RemFSDelver = async (options) => {
     }
   }
 
+  //window.onpopstate = (e) => {
+  //  const urlParams = new URLSearchParams(window.location.search);
+  //  const fsUrl = urlParams.get('fs');
+  //  const path = parsePath(urlParams.get('path'));
+  //  console.log(fsUrl, path);
+  //  navigate(fsUrl, path);
+  //};
+
   // File uploads
   const uppie = new Uppie();
 
