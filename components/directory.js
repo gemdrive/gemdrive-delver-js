@@ -7,7 +7,7 @@ const naturalSorter = new Intl.Collator(undefined, {
 });
 
 
-const Directory = (root, dir, rootUrl, path, token) => {
+const Directory = (state, root, dir, rootUrl, path, token) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
 
@@ -17,7 +17,7 @@ const Directory = (root, dir, rootUrl, path, token) => {
     const parentPlaceholder = {
       type: 'dir',
     };
-    const upDir = ListItem(root, '..', parentPlaceholder, rootUrl, parentPath, token);
+    const upDir = ListItem({}, root, '..', parentPlaceholder, rootUrl, parentPath, token);
     dom.appendChild(upDir);
   }
 
@@ -28,7 +28,7 @@ const Directory = (root, dir, rootUrl, path, token) => {
     for (const filename of sortedNames) {
       const child = dir.children[filename];
       const childPath = path.concat(filename);
-      const childEl = ListItem(root, filename, child, rootUrl, childPath, token)
+      const childEl = ListItem(state.items[filename], root, filename, child, rootUrl, childPath, token)
       dom.appendChild(childEl);
 
       //if (child.type === 'dir') {
@@ -53,7 +53,7 @@ const Directory = (root, dir, rootUrl, path, token) => {
     if (index > -1) {
       const childPath = path.concat(name);
       dom.insertBefore(
-        ListItem(root, name, child, rootUrl, childPath, token),
+        ListItem(state.items[name], root, name, child, rootUrl, childPath, token),
         dom.childNodes[index]);
     }
     else {
@@ -80,7 +80,7 @@ const Directory = (root, dir, rootUrl, path, token) => {
   return { dom, onAddChild, onRemoveChild };
 };
 
-const ListItem = (root, filename, item, rootUrl, path, token) => {
+const ListItem = (state, root, filename, item, rootUrl, path, token) => {
   //const dom = document.createElement('a');
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__list-item');
@@ -100,6 +100,7 @@ const ListItem = (root, filename, item, rootUrl, path, token) => {
     const checkboxEl = document.createElement('input');
     checkboxEl.classList.add('remfs-delver__checkbox');
     checkboxEl.setAttribute('type', 'checkbox');
+    checkboxEl.checked = state && state.selected;
     checkboxEl.addEventListener('click', (e) => {
 
       e.stopPropagation();

@@ -5,6 +5,11 @@ import { Directory } from './components/directory.js';
 
 
 const RemFSDelver = async (options) => {
+
+  const state = {
+    selectedItems: {},
+  };
+
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver');
 
@@ -14,10 +19,6 @@ const RemFSDelver = async (options) => {
   const pageEl = document.createElement('div');
   pageEl.classList.add('remfs-delver__dir-container');
   dom.appendChild(pageEl);
-
-  const state = {
-    selectedItems: {},
-  };
 
   let settings = JSON.parse(localStorage.getItem('settings'));
   if (settings === null) {
@@ -66,8 +67,6 @@ const RemFSDelver = async (options) => {
     controlBar.onLocationChange('', []);
     curFsUrl = null;
     curPath = null;
-    state.selectedItems = {};
-    controlBar.onSelectedItemsChange(state.selectedItems);
     history.pushState(null, '', window.location.pathname);
   });
 
@@ -86,8 +85,6 @@ const RemFSDelver = async (options) => {
 
     curFsUrl = fsUrl;
     curPath = path;
-    state.selectedItems = {};
-    controlBar.onSelectedItemsChange(state.selectedItems);
 
     const fs = settings.filesystems[fsUrl];
     const remfsPath = [...path, 'remfs.json'];
@@ -100,8 +97,27 @@ const RemFSDelver = async (options) => {
 
     if (remfsResponse.status === 200) {
       const remfsRoot = await remfsResponse.json();
+
+      // derive directory state from global state
+      const dirState = {
+        items: {},
+      };
+
+      if (state.selectedItems[fsUrl]) {
+        for (const pathStr in state.selectedItems[fsUrl]) {
+          const selPath = parsePath(pathStr);
+          const selFilename = selPath[selPath.length - 1];
+          const selPathParent = selPath.slice(0, selPath.length - 1);
+          if (encodePath(path) === encodePath(selPathParent)) {
+            dirState.items[selFilename] = {
+              selected: true,
+            };
+          }
+        }
+      }
+
       const curDir = remfsRoot;
-      const dir = Directory(remfsRoot, curDir, fsUrl, path, fs.accessToken);
+      const dir = Directory(dirState, remfsRoot, curDir, fsUrl, path, fs.accessToken);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
       controlBar.onLocationChange(fsUrl, path);
@@ -176,13 +192,17 @@ const RemFSDelver = async (options) => {
   });
 
   pageEl.addEventListener('item-selected', (e) => {
-    const selectUrl = e.detail.fsUrl + encodePath(e.detail.path);
-    state.selectedItems[selectUrl] = true;
+    const { fsUrl, path } = e.detail;
+    const selectUrl = fsUrl + encodePath(path);
+    if (!state.selectedItems[fsUrl]) {
+      state.selectedItems[fsUrl] = {};
+    }
+    state.selectedItems[fsUrl][encodePath(path)] = true;
     controlBar.onSelectedItemsChange(state.selectedItems);
   });
   pageEl.addEventListener('item-deselected', (e) => {
-    const selectUrl = e.detail.fsUrl + encodePath(e.detail.path);
-    delete state.selectedItems[selectUrl];
+    const { fsUrl, path } = e.detail;
+    delete state.selectedItems[fsUrl][encodePath(path)];
     controlBar.onSelectedItemsChange(state.selectedItems);
   });
 
