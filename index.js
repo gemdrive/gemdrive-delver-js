@@ -223,7 +223,7 @@ const RemFSDelver = async (options) => {
 
   controlBar.dom.addEventListener('copy', async (e) => {
 
-    const { numItems, selectedUrls } = buildSelectedUrls(state, settings, state.curFsUrl);
+    const { numItems, selectedUrls } = buildSelectedUrls(state, settings);
 
     const doIt = confirm(`Are you sure you want to copy ${numItems} items?`);
     
@@ -236,8 +236,6 @@ const RemFSDelver = async (options) => {
         if (fs.accessToken) {
           copyCommandUrl += '&access_token=' + fs.accessToken;
         }
-
-        console.log(copyCommandUrl);
 
         try {
           await fetch(copyCommandUrl)
@@ -258,7 +256,7 @@ const RemFSDelver = async (options) => {
 
   controlBar.dom.addEventListener('delete', (e) => {
     
-    const { numItems, selectedUrls } = buildSelectedUrls(state, settings, state.curFsUrl);
+    const { numItems, selectedUrls } = buildSelectedUrls(state, settings);
 
     const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
     
@@ -290,13 +288,13 @@ const RemFSDelver = async (options) => {
   return dom;
 };
 
-function buildSelectedUrls(state, settings, curFsUrl) {
+function buildSelectedUrls(state, settings) {
   let numItems = 0;
   const selectedUrls = [];
 
   for (const fsUrl in state.selectedItems) {
 
-    const fs = settings.filesystems[curFsUrl];
+    const fs = settings.filesystems[fsUrl];
 
     for (const itemKey in state.selectedItems[fsUrl]) {
       numItems += 1;
