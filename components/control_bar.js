@@ -32,6 +32,15 @@ export const ControlBar = () => {
     }));
   });
 
+  const reloadBtnEl = document.createElement('ion-icon');
+  btnContainerEl.appendChild(reloadBtnEl);
+  reloadBtnEl.name = 'refresh-circle';
+  reloadBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('reload', {
+      bubbles: true,
+    }));
+  });
+
   const authBtnEl = document.createElement('ion-icon');
   btnContainerEl.appendChild(authBtnEl);
   authBtnEl.name = 'key';
