@@ -6,6 +6,10 @@ import { Directory } from './components/directory.js';
 
 const RemFSDelver = async (options) => {
 
+  // TODO: move these into state object
+  let curFsUrl;
+  let curPath;
+
   const state = {
     selectedItems: {},
   };
@@ -44,6 +48,10 @@ const RemFSDelver = async (options) => {
     localStorage.setItem('settings', JSON.stringify(settings));
   }
 
+  if (urlParams.has('fs') && urlParams.has('path')) {
+    navigate(urlParams.get('fs'), parsePath(urlParams.get('path')));
+  }
+
   const fsList = FilesystemList(settings.filesystems);
   pageEl.appendChild(fsList.dom);
 
@@ -70,6 +78,10 @@ const RemFSDelver = async (options) => {
     history.pushState(null, '', window.location.pathname);
   });
 
+  controlBar.dom.addEventListener('reload', (e) => {
+    navigate(curFsUrl, curPath);
+  });
+
   pageEl.addEventListener('select-filesystem', async (e) => {
     const fsUrl = e.detail.url;
     await navigate(fsUrl, []);
@@ -79,14 +91,19 @@ const RemFSDelver = async (options) => {
     await navigate(e.detail.fsUrl, e.detail.path);
   });
 
-  let curFsUrl;
-  let curPath;
   async function navigate(fsUrl, path) {
 
     curFsUrl = fsUrl;
     curPath = path;
 
-    const fs = settings.filesystems[fsUrl];
+    let fs = settings.filesystems[fsUrl];
+
+    if (!fs) {
+      fs = {};
+      settings.filesystems[fsUrl] = fs;
+      localStorage.setItem('settings', JSON.stringify(settings));
+    }
+
     const remfsPath = [...path, 'remfs.json'];
     let reqUrl = fsUrl + encodePath(remfsPath);
     if (fs.accessToken) {
@@ -222,7 +239,6 @@ const RemFSDelver = async (options) => {
           copyCommandUrl += '&access_token=' + fs.accessToken;
         }
 
-        console.log(copyCommandUrl);
         try {
           await fetch(copyCommandUrl)
           state.selectedItems = {};
