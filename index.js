@@ -6,11 +6,9 @@ import { Directory } from './components/directory.js';
 
 const RemFSDelver = async (options) => {
 
-  // TODO: move these into state object
-  let curFsUrl;
-  let curPath;
-
   const state = {
+    curFsUrl: null,
+    curPath: null,
     selectedItems: {},
   };
 
@@ -73,13 +71,13 @@ const RemFSDelver = async (options) => {
     const fsList = FilesystemList(settings.filesystems);
     pageEl.appendChild(fsList.dom);
     controlBar.onLocationChange('', []);
-    curFsUrl = null;
-    curPath = null;
+    state.curFsUrl = null;
+    state.curPath = null;
     history.pushState(null, '', window.location.pathname);
   });
 
   controlBar.dom.addEventListener('reload', (e) => {
-    navigate(curFsUrl, curPath);
+    navigate(state.curFsUrl, state.curPath);
   });
 
   pageEl.addEventListener('select-filesystem', async (e) => {
@@ -93,8 +91,8 @@ const RemFSDelver = async (options) => {
 
   async function navigate(fsUrl, path) {
 
-    curFsUrl = fsUrl;
-    curPath = path;
+    state.curFsUrl = fsUrl;
+    state.curPath = path;
 
     let fs = settings.filesystems[fsUrl];
 
@@ -165,10 +163,10 @@ const RemFSDelver = async (options) => {
     for (const param of formData.entries()) {
       const file = param[1];
 
-      const uploadPath = [...curPath, file.name];
-      let uploadUrl = curFsUrl + encodePath(uploadPath);
+      const uploadPath = [...state.curPath, file.name];
+      let uploadUrl = state.curFsUrl + encodePath(uploadPath);
 
-      const fs = settings.filesystems[curFsUrl];
+      const fs = settings.filesystems[state.curFsUrl];
       if (fs.accessToken) {
         uploadUrl += '?access_token=' + fs.accessToken;
       }
@@ -181,14 +179,14 @@ const RemFSDelver = async (options) => {
       .then(remfs => {
         // TODO: This is a hack. Will probably need to dynamically update
         // at some point.
-        navigate(curFsUrl, curPath);
+        navigate(state.curFsUrl, state.curPath);
       })
       .catch(e => {
         
         const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
 
         if (doAuth) {
-          authorize(curFsUrl);
+          authorize(state.curFsUrl);
         }
       });
     }
@@ -203,7 +201,7 @@ const RemFSDelver = async (options) => {
   dom.appendChild(folderInput);
 
   controlBar.dom.addEventListener('upload', (e) => {
-    if (curFsUrl) {
+    if (state.curFsUrl) {
       fileInput.click();
     }
   });
@@ -225,25 +223,27 @@ const RemFSDelver = async (options) => {
 
   controlBar.dom.addEventListener('copy', async (e) => {
 
-    const { numItems, selectedUrls } = buildSelectedUrls(state, settings, curFsUrl);
+    const { numItems, selectedUrls } = buildSelectedUrls(state, settings, state.curFsUrl);
 
-    const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
+    const doIt = confirm(`Are you sure you want to copy ${numItems} items?`);
     
     if (doIt) {
 
-      const fs = settings.filesystems[curFsUrl];
+      const fs = settings.filesystems[state.curFsUrl];
 
       for (const url of selectedUrls) {
-        let copyCommandUrl = curFsUrl + encodePath(curPath) + '?remfs-method=remote-download&url=' + encodeURIComponent(url);
+        let copyCommandUrl = state.curFsUrl + encodePath(state.curPath) + '?remfs-method=remote-download&url=' + encodeURIComponent(url);
         if (fs.accessToken) {
           copyCommandUrl += '&access_token=' + fs.accessToken;
         }
+
+        console.log(copyCommandUrl);
 
         try {
           await fetch(copyCommandUrl)
           state.selectedItems = {};
           controlBar.onSelectedItemsChange(state.selectedItems);
-          navigate(curFsUrl, curPath);
+          navigate(state.curFsUrl, state.curPath);
         }
         catch (e) {
           alert("Failed to copy");
@@ -253,12 +253,12 @@ const RemFSDelver = async (options) => {
   });
 
   controlBar.dom.addEventListener('authorize', (e) => {
-    authorize(curFsUrl);
+    authorize(state.curFsUrl);
   });
 
   controlBar.dom.addEventListener('delete', (e) => {
     
-    const { numItems, selectedUrls } = buildSelectedUrls(state, settings, curFsUrl);
+    const { numItems, selectedUrls } = buildSelectedUrls(state, settings, state.curFsUrl);
 
     const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
     
@@ -271,7 +271,7 @@ const RemFSDelver = async (options) => {
           if (response.status === 200) {
             state.selectedItems = {};
             controlBar.onSelectedItemsChange(state.selectedItems);
-            navigate(curFsUrl, curPath);
+            navigate(state.curFsUrl, state.curPath);
           }
           else if (response.status === 403) {
             alert("Failed delete. Unauthorized");
