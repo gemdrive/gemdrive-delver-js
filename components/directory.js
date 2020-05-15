@@ -111,6 +111,7 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
           detail: {
             fsUrl: rootUrl,
             path,
+            item,
           },
         }));
       }

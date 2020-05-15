@@ -215,6 +215,10 @@ const RemFSDelver = async (options) => {
       sse.addEventListener('update', (e) => {
         const event = JSON.parse(e.data);
         uploadProgress.updateCount(event.remfs.size);
+
+        if (event.type === 'complete') {
+          sse.close();
+        }
       });
 
       fetch(uploadUrl, {
@@ -253,12 +257,12 @@ const RemFSDelver = async (options) => {
   });
 
   pageEl.addEventListener('item-selected', (e) => {
-    const { fsUrl, path } = e.detail;
+    const { fsUrl, path, item } = e.detail;
     const selectUrl = fsUrl + encodePath(path);
     if (!state.selectedItems[fsUrl]) {
       state.selectedItems[fsUrl] = {};
     }
-    state.selectedItems[fsUrl][encodePath(path)] = true;
+    state.selectedItems[fsUrl][encodePath(path)] = item;
     controlBar.onSelectedItemsChange(state.selectedItems);
   });
   pageEl.addEventListener('item-deselected', (e) => {
@@ -269,7 +273,7 @@ const RemFSDelver = async (options) => {
 
   controlBar.dom.addEventListener('copy', async (e) => {
 
-    const { numItems, selectedUrls } = buildSelectedUrls(state, settings);
+    const { numItems, selectedUrls, selectedItems } = buildSelectedUrls(state, settings);
 
     const doIt = confirm(`Are you sure you want to copy ${numItems} items?`);
     
@@ -277,11 +281,30 @@ const RemFSDelver = async (options) => {
 
       const fs = settings.filesystems[state.curFsUrl];
 
-      for (const url of selectedUrls) {
+      for (let i = 0; i < selectedUrls.length; i++) {
+        const url = selectedUrls[i];
+        const item = selectedItems[i];
+
         let copyCommandUrl = state.curFsUrl + encodePath(state.curPath) + '?remfs-method=remote-download&url=' + encodeURIComponent(url);
+        let sseUrl = state.curFsUrl + encodePath(state.curPath) + '?events=true';
+
         if (fs.accessToken) {
           copyCommandUrl += '&access_token=' + fs.accessToken;
+          sseUrl += '&access_token=' + fs.accessToken;
         }
+
+        const progress = Progress(item.size);
+        pageEl.insertBefore(progress.dom, pageEl.firstChild);
+
+        const sse = new EventSource(sseUrl); 
+        sse.addEventListener('update', (e) => {
+          const event = JSON.parse(e.data);
+          progress.updateCount(event.remfs.size);
+
+          if (event.type === 'complete') {
+            sse.close();
+          }
+        });
 
         try {
           await fetch(copyCommandUrl)
@@ -337,6 +360,7 @@ const RemFSDelver = async (options) => {
 function buildSelectedUrls(state, settings) {
   let numItems = 0;
   const selectedUrls = [];
+  const selectedItems = [];
 
   for (const fsUrl in state.selectedItems) {
 
@@ -349,10 +373,11 @@ function buildSelectedUrls(state, settings) {
         selectedUrl += '?access_token=' + fs.accessToken;
       }
       selectedUrls.push(selectedUrl);
+      selectedItems.push(state.selectedItems[fsUrl][itemKey]);
     }
   }
 
-  return { numItems, selectedUrls };
+  return { numItems, selectedUrls, selectedItems };
 }
 
 
