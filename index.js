@@ -79,6 +79,40 @@ const RemFSDelver = async (options) => {
   controlBar.dom.addEventListener('reload', (e) => {
     navigate(state.curFsUrl, state.curPath);
   });
+  
+  controlBar.dom.addEventListener('create-directory', (e) => {
+    const dirName = prompt("Enter directory name");
+
+    if (dirName) {
+
+      const newDirPath = [...state.curPath, dirName];
+      let createDirReqUrl = state.curFsUrl + encodePath(newDirPath) + '/';
+      console.log(createDirReqUrl);
+
+      const fs = settings.filesystems[state.curFsUrl];
+      if (fs.accessToken) {
+        createDirReqUrl += '?access_token=' + fs.accessToken;
+      }
+
+      fetch(createDirReqUrl, {
+        method: 'PUT',
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          navigate(state.curFsUrl, state.curPath);
+        }
+        else if (response.status === 403) {
+          alert("Creating directory failed. Unauthorized");
+        }
+        else {
+          alert("Creating directory failed for unknown reason.");
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+    }
+  });
 
   pageEl.addEventListener('select-filesystem', async (e) => {
     const fsUrl = e.detail.url;

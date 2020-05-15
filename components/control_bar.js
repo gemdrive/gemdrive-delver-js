@@ -59,6 +59,15 @@ export const ControlBar = () => {
   });
   btnContainerEl.appendChild(uploadBtnEl);
 
+  const newDirBtnEl = document.createElement('ion-icon');
+  newDirBtnEl.name = 'add-circle';
+  newDirBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('create-directory', {
+      bubbles: true,
+    }));
+  });
+  btnContainerEl.appendChild(newDirBtnEl);
+
   const copyBtnContainerEl = document.createElement('span');
   btnContainerEl.appendChild(copyBtnContainerEl);
 

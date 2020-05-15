@@ -12,3 +12,4 @@
 * Handle selecting both parent and child items, ie don't want to attempt to
   delete a child if the parent has already be deleted.
 * Warn when overwriting.
+* Add ability to show QR code for a location.
