@@ -96,3 +96,15 @@ html {
   height: 20px;
   margin: 5px;
 }
+
+.remfs-progress-bar__container {
+  height: 20px;
+  border: 2px solid black;
+}
+
+.remfs-progress-bar {
+  background-color: #aaa;
+  width: 0%;
+  height: 100%;
+  transition: width 0.25s;
+}

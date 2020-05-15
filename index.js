@@ -2,6 +2,7 @@ import { parsePath, encodePath, removeAllChildren } from './utils.js';
 import { ControlBar } from './components/control_bar.js';
 import { FilesystemList } from './components/filesystem_list.js';
 import { Directory } from './components/directory.js';
+import { Progress } from './components/progress.js';
 
 
 const RemFSDelver = async (options) => {
@@ -87,7 +88,6 @@ const RemFSDelver = async (options) => {
 
       const newDirPath = [...state.curPath, dirName];
       let createDirReqUrl = state.curFsUrl + encodePath(newDirPath) + '/';
-      console.log(createDirReqUrl);
 
       const fs = settings.filesystems[state.curFsUrl];
       if (fs.accessToken) {
@@ -200,10 +200,22 @@ const RemFSDelver = async (options) => {
       const uploadPath = [...state.curPath, file.name];
       let uploadUrl = state.curFsUrl + encodePath(uploadPath);
 
+      let sseUrl = uploadUrl + '?events=true';
+
       const fs = settings.filesystems[state.curFsUrl];
       if (fs.accessToken) {
         uploadUrl += '?access_token=' + fs.accessToken;
+        sseUrl += '&access_token=' + fs.accessToken;
       }
+
+      const uploadProgress = Progress(file.size);
+      pageEl.insertBefore(uploadProgress.dom, pageEl.firstChild);
+
+      const sse = new EventSource(sseUrl); 
+      sse.addEventListener('update', (e) => {
+        const event = JSON.parse(e.data);
+        uploadProgress.updateCount(event.remfs.size);
+      });
 
       fetch(uploadUrl, {
         method: 'PUT',
