@@ -32,17 +32,22 @@ const RemFSDelver = async (options) => {
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('code') && urlParams.has('fs')) {
+  if (urlParams.has('code') && urlParams.has('state')) {
     const code = urlParams.get('code');
     urlParams.delete('code');
 
-    history.pushState(null, '', window.location.pathname + '?' + decodeURIComponent(urlParams.toString()));
+    const fsUrl = urlParams.get('state');
+    urlParams.delete('state');
 
-    const fsUrl = urlParams.get('fs');
+    //history.pushState(null, '', window.location.pathname + '?' + decodeURIComponent(urlParams.toString()));
+    history.pushState(null, '', window.location.pathname);
 
     const accessToken = await fetch(fsUrl + '?pauth-method=token&grant_type=authorization_code&code=' + code)
       .then(r => r.text());
 
+    if (!settings.filesystems[fsUrl]) {
+      settings.filesystems[fsUrl] = {};
+    }
     settings.filesystems[fsUrl].accessToken = accessToken;
     localStorage.setItem('settings', JSON.stringify(settings));
   }
@@ -56,14 +61,28 @@ const RemFSDelver = async (options) => {
 
   pageEl.addEventListener('add-filesystem', async (e) => {
 
-    const remfsUrl = await validateUrl(e.detail.url, settings);
-    
-    if (remfsUrl) {
+    const fsUrl = e.detail.url;
+
+    const result = await validateUrl(fsUrl, settings);
+
+    if (result.err) {
+      if (result.err === 403) {
+        const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
+
+        if (doAuth) {
+          authorize(result.remfsUrl);
+        }
+      }
+      else {
+        alert(result.err);
+      }
+    }
+    else {
       const filesystem = {};
-      settings.filesystems[remfsUrl] = filesystem;
+      settings.filesystems[result.remfsUrl] = filesystem;
       localStorage.setItem('settings', JSON.stringify(settings));
 
-      fsList.addFilesystem(remfsUrl, filesystem);
+      fsList.addFilesystem(result.remfsUrl, filesystem);
     }
   });
 
@@ -418,8 +437,7 @@ async function validateUrl(url, settings) {
   }
 
   if (settings.filesystems[remfsUrl] !== undefined) {
-    alert("Filesystem already exists");
-    return;
+    return { err: "Filesystem already exists" };
   }
 
   try {
@@ -427,13 +445,11 @@ async function validateUrl(url, settings) {
     const response = await fetch(fetchUrl);
 
     if (response.status !== 200) {
-      alert(`Failed retrieving ${fetchUrl}\nStatus Code: ${response.status}`);
-      return;
+      return { err: response.status, remfsUrl };
     }
   }
   catch(e) {
-    alert("Invalid filesystem. Is it a valid URL?");
-    return;
+    return { err: "Invalid filesystem. Is it a valid URL?" };
   }
 
   return remfsUrl;
@@ -442,8 +458,9 @@ async function validateUrl(url, settings) {
 function authorize(fsUrl) {
   const clientId = window.location.origin;
   const redirectUri = encodeURIComponent(window.location.href);
+  const state = encodeURIComponent(fsUrl);
   const scope = '/:write';
-  window.location.href = fsUrl + `?pauth-method=authorize&response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+  window.location.href = fsUrl + `?pauth-method=authorize&response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
 }
 
 
