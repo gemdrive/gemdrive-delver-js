@@ -138,9 +138,9 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
   }
   else {
 
-    const thumbUrl = getThumbUrl(root, rootUrl, path);
+    const thumbUrl = rootUrl + '/thumbnails' + encodePath(path);
 
-    if (thumbUrl) {
+    if (isImage(thumbUrl)) {
       const thumbEl = document.createElement('img');
       thumbEl.classList.add('remfs-delver__thumb');
 
