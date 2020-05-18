@@ -17,9 +17,27 @@ const Directory = (state, root, dir, rootUrl, path, token) => {
     const parentPlaceholder = {
       type: 'dir',
     };
-    const upDir = ListItem({}, root, '..', parentPlaceholder, rootUrl, parentPath, token);
+    const listItem = ListItem({}, root, '..', parentPlaceholder, rootUrl, parentPath, token);
+    const upDir = listItem.dom;
     dom.appendChild(upDir);
   }
+
+  const items = {};
+
+  const observeCallback = (entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const item = items[entry.target.dataset.filename];
+        item.onVisible();
+        observer.unobserve(entry.target);
+      }
+    });
+  };
+
+  const observeOptions = {
+  };
+
+  const observer = new IntersectionObserver(observeCallback, observeOptions);
 
   if (dir.children) {
     
@@ -28,7 +46,11 @@ const Directory = (state, root, dir, rootUrl, path, token) => {
     for (const filename of sortedNames) {
       const child = dir.children[filename];
       const childPath = path.concat(filename);
-      const childEl = ListItem(state.items[filename], root, filename, child, rootUrl, childPath, token)
+      const listItem = ListItem(state.items[filename], root, filename, child, rootUrl, childPath, token)
+      items[filename] = listItem;
+      listItem.dom.dataset.filename = filename;
+      const childEl = listItem.dom;
+      observer.observe(childEl);
       dom.appendChild(childEl);
 
       //if (child.type === 'dir') {
@@ -52,8 +74,9 @@ const Directory = (state, root, dir, rootUrl, path, token) => {
 
     if (index > -1) {
       const childPath = path.concat(name);
+      const listItem = ListItem(state.items[name], root, name, child, rootUrl, childPath, token);
       dom.insertBefore(
-        ListItem(state.items[name], root, name, child, rootUrl, childPath, token),
+        listItem.dom,
         dom.childNodes[index]);
     }
     else {
@@ -129,36 +152,22 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
     inner.appendChild(checkboxEl);
   }
 
+
+  const iconContainerEl = document.createElement('span');
+  iconContainerEl.classList.add('remfs-delver-list-item__icon-container');
+  inner.appendChild(iconContainerEl);
+
   let thumbnailPromise;
 
   if (item.type === 'dir') {
     const iconEl = document.createElement('ion-icon');
     iconEl.name = 'folder';
-    inner.appendChild(iconEl);
+    iconContainerEl.appendChild(iconEl);
   }
   else {
-
-    const thumbUrl = rootUrl + '/thumbnails' + encodePath(path);
-
-    if (isImage(thumbUrl)) {
-      const thumbEl = document.createElement('img');
-      thumbEl.classList.add('remfs-delver__thumb');
-
-      thumbnailPromise = fetch(thumbUrl + '?access_token=' + token)
-      .then(response => response.blob());
-
-      thumbnailPromise.then(blob => {
-        const url = URL.createObjectURL(blob);
-        thumbEl.src = url;
-      })
-
-      inner.appendChild(thumbEl);
-    }
-    else {
-      const iconEl = document.createElement('ion-icon');
-      iconEl.name = 'document';
-      inner.appendChild(iconEl);
-    }
+    const iconEl = document.createElement('ion-icon');
+    iconEl.name = 'document';
+    iconContainerEl.appendChild(iconEl);
   }
 
   const filenameEl = document.createElement('span');
@@ -203,7 +212,29 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
     }
   });
 
-  return dom;
+  function onVisible() {
+    const thumbUrl = rootUrl + '/thumbnails' + encodePath(path);
+
+    if (isImage(thumbUrl)) {
+      const thumbEl = document.createElement('img');
+      thumbEl.classList.add('remfs-delver__thumb');
+
+      thumbnailPromise = fetch(thumbUrl + '?access_token=' + token)
+      .then(response => response.blob());
+
+      thumbnailPromise.then(blob => {
+        const url = URL.createObjectURL(blob);
+        thumbEl.src = url;
+      })
+
+      iconContainerEl.replaceChild(thumbEl, iconContainerEl.firstChild);
+    }
+  }
+
+  return {
+    dom,
+    onVisible,
+  };
 };
 
 
