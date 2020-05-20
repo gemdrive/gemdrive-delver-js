@@ -360,7 +360,11 @@ const RemFSDelver = async (options) => {
             navigate(state.curFsUrl, state.curPath);
           }
           else if (response.status === 403) {
-            alert("Failed delete. Unauthorized");
+            const doAuth = confirm("Unauthorized to delete. Do you want to attempt authorization?");
+
+            if (doAuth) {
+              authorize(state.curFsUrl);
+            }
           }
           else {
             alert("Failed delete for unknown reason.");
