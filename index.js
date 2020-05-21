@@ -121,7 +121,11 @@ const RemFSDelver = async (options) => {
           navigate(state.curFsUrl, state.curPath);
         }
         else if (response.status === 403) {
-          alert("Creating directory failed. Unauthorized");
+          const doAuth = confirm("Unauthorized to create. Do you want to attempt authorization?");
+
+          if (doAuth) {
+            authorize(state.curFsUrl);
+          }
         }
         else {
           alert("Creating directory failed for unknown reason.");
