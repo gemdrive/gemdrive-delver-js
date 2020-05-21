@@ -463,7 +463,7 @@ function authorize(fsUrl) {
   const clientId = window.location.origin;
   const redirectUri = encodeURIComponent(window.location.href);
   const state = encodeURIComponent(fsUrl);
-  const scope = '/:write';
+  const scope = 'type=dir;perm=write;path=/';
   window.location.href = fsUrl + `?pauth-method=authorize&response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
 }
 
