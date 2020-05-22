@@ -213,7 +213,7 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
   });
 
   function onVisible() {
-    const thumbUrl = rootUrl + '/thumbnails' + encodePath(path);
+    const thumbUrl = rootUrl + '/.remfs/images/256' + encodePath(path);
 
     if (isImage(thumbUrl)) {
       const thumbEl = document.createElement('img');
