@@ -36,7 +36,17 @@ const RemFSDelver = async (options) => {
     const code = urlParams.get('code');
     urlParams.delete('code');
 
-    const fsUrl = urlParams.get('state');
+    const savedState = localStorage.getItem('oauthState');
+    localStorage.removeItem('oauthState');
+
+    const returnedState =  urlParams.get('state');
+
+    if (savedState !== returnedState.slice(0, savedState.length)) {
+      alert("Invalid state returned from server. Aborting");
+      return;
+    }
+
+    const fsUrl = returnedState.slice(savedState.length);
     urlParams.delete('state');
 
     //history.pushState(null, '', window.location.pathname + '?' + decodeURIComponent(urlParams.toString()));
@@ -469,8 +479,12 @@ async function validateUrl(url, settings) {
 async function authorize(fsUrl) {
   const clientId = window.location.origin;
   const redirectUri = encodeURIComponent(window.location.href);
-  const state = encodeURIComponent(fsUrl);
+
   const scope = 'type=dir;perm=write;path=/';
+
+  const stateCode = generateRandomString();
+  const state = encodeURIComponent(stateCode + fsUrl);
+  localStorage.setItem('oauthState', stateCode);
 
   const pkceCodeVerifier = generateRandomString();
   localStorage.setItem('pkceCodeVerifier', pkceCodeVerifier);
