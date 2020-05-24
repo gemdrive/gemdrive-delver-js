@@ -55,8 +55,22 @@ const RemFSDelver = async (options) => {
     const codeVerifier = localStorage.getItem('pkceCodeVerifier');
     localStorage.removeItem('pkceCodeVerifier');
 
-    const accessToken = await fetch(fsUrl + `?pauth-method=token&grant_type=authorization_code&code=${code}&code_verifier=${codeVerifier}`)
-      .then(r => r.text());
+    const tokenUrl = fsUrl + `?pauth-method=token`
+    const params = `grant_type=authorization_code`
+      + `&client_id=${encodeURIComponent(window.location.origin)}`
+      + `&redirect_uri=${encodeURIComponent(window.location.href)}`
+      + `&code=${code}`
+      + `&code_verifier=${codeVerifier}`;
+
+    const accessToken = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      },
+      body: params,
+    })
+    .then(r => r.json())
+    .then(json => json.access_token);
 
     if (!settings.filesystems[fsUrl]) {
       settings.filesystems[fsUrl] = {};
