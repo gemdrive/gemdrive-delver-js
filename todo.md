@@ -13,3 +13,6 @@
   delete a child if the parent has already be deleted.
 * Warn when overwriting.
 * Add ability to show QR code for a location.
+* When talking to HTTP/1.1 servers, it appears uploads with more than the max
+  number of concurrent requests will hang because the SSE requests are blocking
+  the uploads.
