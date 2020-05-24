@@ -49,8 +49,15 @@ const RemFSDelver = async (options) => {
     const fsUrl = returnedState.slice(savedState.length);
     urlParams.delete('state');
 
-    //history.pushState(null, '', window.location.pathname + '?' + decodeURIComponent(urlParams.toString()));
-    history.pushState(null, '', window.location.pathname);
+    const redirParamsStr = decodeURIComponent(urlParams.toString()); 
+
+    if (redirParamsStr !== '') {
+      history.pushState(null, '', window.location.pathname + '?' + redirParamsStr);
+    }
+    else {
+      history.pushState(null, '', window.location.pathname);
+    }
+    //history.pushState(null, '', window.location.pathname);
 
     const codeVerifier = localStorage.getItem('pkceCodeVerifier');
     localStorage.removeItem('pkceCodeVerifier');
