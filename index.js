@@ -33,52 +33,12 @@ const RemFSDelver = async (options) => {
 
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('code') && urlParams.has('state')) {
-    const code = urlParams.get('code');
-    urlParams.delete('code');
 
-    const savedState = localStorage.getItem('oauthState');
-    localStorage.removeItem('oauthState');
+    const { accessToken, state } = await window.remfsAuthClient.completeAuthorization();
 
-    const returnedState =  urlParams.get('state');
+    console.log(accessToken, state);
 
-    if (savedState !== returnedState.slice(0, savedState.length)) {
-      alert("Invalid state returned from server. Aborting");
-      return;
-    }
-
-    const fsUrl = returnedState.slice(savedState.length);
-    urlParams.delete('state');
-
-    const redirParamsStr = decodeURIComponent(urlParams.toString()); 
-
-    if (redirParamsStr !== '') {
-      history.pushState(null, '', window.location.pathname + '?' + redirParamsStr);
-    }
-    else {
-      history.pushState(null, '', window.location.pathname);
-    }
-    //history.pushState(null, '', window.location.pathname);
-
-    const codeVerifier = localStorage.getItem('pkceCodeVerifier');
-    localStorage.removeItem('pkceCodeVerifier');
-
-    const tokenUrl = fsUrl + `?pauth-method=token`
-    const params = `grant_type=authorization_code`
-      + `&client_id=${encodeURIComponent(window.location.origin)}`
-      + `&redirect_uri=${encodeURIComponent(window.location.href)}`
-      + `&code=${code}`
-      + `&code_verifier=${codeVerifier}`;
-
-    const accessToken = await fetch(tokenUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      },
-      body: params,
-    })
-    .then(r => r.json())
-    .then(json => json.access_token);
-
+    const fsUrl = state;
     if (!settings.filesystems[fsUrl]) {
       settings.filesystems[fsUrl] = {};
     }
@@ -282,19 +242,25 @@ const RemFSDelver = async (options) => {
         method: 'PUT',
         body: file,
       })
-      .then(response => response.json())
+      .then(response => {
+        if (response.status === 403) {
+          const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
+
+          if (doAuth) {
+            authorize(state.curFsUrl);
+          }
+        }
+        else {
+          return response.json()
+        }
+      })
       .then(remfs => {
         // TODO: This is a hack. Will probably need to dynamically update
         // at some point.
         navigate(state.curFsUrl, state.curPath);
       })
       .catch(e => {
-        
-        const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
-
-        if (doAuth) {
-          authorize(state.curFsUrl);
-        }
+        console.error(e);
       });
     }
   };
@@ -498,60 +464,17 @@ async function validateUrl(url, settings) {
 }
 
 async function authorize(fsUrl) {
-  const clientId = window.location.origin;
-  const redirectUri = encodeURIComponent(window.location.href);
-
-  const scope = 'type=dir;perm=write;path=/';
-
-  const stateCode = generateRandomString();
-  const state = encodeURIComponent(stateCode + fsUrl);
-  localStorage.setItem('oauthState', stateCode);
-
-  const pkceCodeVerifier = generateRandomString();
-  localStorage.setItem('pkceCodeVerifier', pkceCodeVerifier);
-
-  const pkceCodeChallenge = await pkceChallengeFromVerifier(pkceCodeVerifier);
-
-  window.location.href = fsUrl
-    + `?pauth-method=authorize`
-    + `&response_type=code`
-    + `&client_id=${clientId}`
-    + `&redirect_uri=${redirectUri}`
-    + `&scope=${scope}`
-    + `&state=${state}`
-    + `&code_challenge=${encodeURIComponent(pkceCodeChallenge)}`
-    + `&code_challenge_method=S256`;
-}
-
-
-// The following functions were taken from:
-// https://github.com/aaronpk/pkce-vanilla-js
-// Generate a secure random string using the browser crypto functions
-function generateRandomString() {
-  const array = new Uint32Array(28);
-  window.crypto.getRandomValues(array);
-  return Array.from(array, dec => ('0' + dec.toString(16)).substr(-2)).join('');
-}
-// Calculate the SHA256 hash of the input text. 
-// Returns a promise that resolves to an ArrayBuffer
-function sha256(plain) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(plain);
-  return window.crypto.subtle.digest('SHA-256', data);
-}
-// Base64-urlencodes the input string
-function base64urlencode(str) {
-  // Convert the ArrayBuffer to string using Uint8 array to conver to what btoa accepts.
-  // btoa accepts chars only within ascii 0-255 and base64 encodes them.
-  // Then convert the base64 encoded to base64url encoded
-  //   (replace + with -, replace / with _, trim trailing =)
-  return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-// Return the base64-urlencoded sha256 hash for the PKCE challenge
-async function pkceChallengeFromVerifier(v) {
-  const hashed = await sha256(v);
-  return base64urlencode(hashed);
+  return window.remfsAuthClient.authorize({
+    driveUri: fsUrl,
+    perms: [
+      {
+        type: 'dir',
+        perm: 'write',
+        path: '/',
+      }
+    ],
+    state: fsUrl,
+  });
 }
 
 
