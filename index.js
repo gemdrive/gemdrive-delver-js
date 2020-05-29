@@ -31,6 +31,7 @@ const RemFSDelver = async (options) => {
     localStorage.setItem('settings', JSON.stringify(settings));
   }
 
+
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('code') && urlParams.has('state')) {
 
@@ -460,7 +461,9 @@ async function validateUrl(url, settings) {
     return { err: "Invalid filesystem. Is it a valid URL?" };
   }
 
-  return remfsUrl;
+  return {
+    remfsUrl
+  };
 }
 
 async function authorize(fsUrl) {
