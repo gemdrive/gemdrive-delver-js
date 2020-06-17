@@ -66,6 +66,8 @@ html {
 
 .remfs-delver__list-item-filename {
   margin-left: 4px;
+  max-width: 75%;
+  overflow-x: hidden;
 }
 
 .remfs-delver__list-item:visited {
