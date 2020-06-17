@@ -1,3 +1,7 @@
+:root {
+  --desktop-width: 1281px;
+}
+
 html {
   font-family: Verdana;
 }
@@ -46,10 +50,18 @@ html {
   font-size: 18px;
   text-decoration: none;
   color: var(--color);
+  height: 64px;
+  border-bottom: 2px solid #222;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.remfs-delver__list-item:hover {
+  background-color: #ddd;
 }
 
 .remfs-delver__thumb {
-  height: 64px;
+  height: 48px;
 }
 
 .remfs-delver__list-item-filename {
@@ -63,11 +75,11 @@ html {
 .remfs-delver__list-content {
   padding-top: 5px;
   padding-bottom: 5px;
-  border-bottom: 2px solid #222;
+  display: flex;
+  align-items: center;
 }
 
 .remfs-delver__list-content:hover {
-  background-color: #ddd;
 }
 
 .remfs-delver__preview {
@@ -92,9 +104,11 @@ html {
 }
 
 .remfs-delver__checkbox {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   margin: 5px;
+  outline: 2px solid black;
+  flex-shrink: 0;
 }
 
 .remfs-progress-bar__container {
@@ -107,4 +121,15 @@ html {
   width: 0%;
   height: 100%;
   transition: width 0.25s;
+}
+
+/* large displays */
+@media (min-width: 1281px) {
+
+  .remfs-delver__checkbox {
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+    outline: 1px solid black;
+  }
 }
