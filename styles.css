@@ -68,8 +68,9 @@ html {
 }
 
 .remfs-delver__thumb-img {
-  max-height: 64px;
-  max-width: 64px;
+  width: 100%;
+  height: 100%; 
+  object-fit: contain;
 }
 
 .remfs-delver__list-item-filename {
@@ -96,11 +97,15 @@ html {
 .remfs-delver__preview {
   display: flex;
   justify-content: center;
+  align-items: center;
   background-color: #000;
+  height: 340px;
 }
 
 .remfs-delver__preview-image {
-  height: 300px;
+  width: 100%;
+  height: 100%; 
+  object-fit: contain;
 }
 
 .remfs-delver-item__controls {
