@@ -316,10 +316,6 @@ const DownloadButton = (rootUrl, path) => {
   return dom;
 };
 
-function getThumbUrl(root, rootUrl, path) {
-  return getFileUrl(root, rootUrl, 'thumbnails', path);
-}
-
 function getPreviewUrl(root, rootUrl, path, parentEl) {
 
   let previewWidth = 512;
@@ -333,33 +329,7 @@ function getPreviewUrl(root, rootUrl, path, parentEl) {
   }
 
   return rootUrl + `/.gemdrive/images/${previewWidth}${encodePath(path)}`;
-  //return getFileUrl(root, rootUrl, 'previews', path);
 }
-
-function getFileUrl(root, rootUrl, type, path) {
-  const filename = path[path.length - 1];
-  if (isImage(filename) && root.children[type]) {
-    let curItem = root.children[type];
-
-    for (const part of path) {
-      if (curItem.children) {
-        curItem = curItem.children[part];
-      }
-      else {
-        console.log("file not found");
-        break;
-      }
-    }
-
-    if (curItem) {
-      const url = rootUrl + '/' + type + encodePath(path);
-      return url;
-    }
-  }
-
-  return null;
-}
-
 
 function isImage(pathStr) {
   const lower = pathStr.toLowerCase(pathStr);
