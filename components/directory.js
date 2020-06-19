@@ -202,12 +202,14 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
 
       showPreview = !showPreview;
 
-      //if (showPreview) {
-      //  previewEl.appendChild(ImagePreview(root, rootUrl, path, thumbnailPromise));
-      //}
-      //else {
-      //  removeAllChildren(previewEl);
-      //}
+      if (showPreview) {
+        if (isImage(filename)) {
+          previewEl.appendChild(ImagePreview(root, rootUrl, path, thumbnailPromise, token));
+        }
+      }
+      else {
+        removeAllChildren(previewEl);
+      }
       //dom.setAttribute('target', '_blank');
     }
   });
@@ -258,7 +260,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise, token) => {
     });
   }
 
-  const previewUrl = getPreviewUrl(root, rootUrl, path);
+  const previewUrl = getPreviewUrl(root, rootUrl, path, dom);
 
   if (previewUrl) {
     fetch(previewUrl + '?access_token=' + token)
@@ -318,8 +320,20 @@ function getThumbUrl(root, rootUrl, path) {
   return getFileUrl(root, rootUrl, 'thumbnails', path);
 }
 
-function getPreviewUrl(root, rootUrl, path) {
-  return getFileUrl(root, rootUrl, 'previews', path);
+function getPreviewUrl(root, rootUrl, path, parentEl) {
+
+  let previewWidth = 512;
+
+  if (window.innerWidth > 512) {
+    previewWidth = 1024;
+  }
+
+  if (window.innerWidth > 1024) {
+    previewWidth = 2048;
+  }
+
+  return rootUrl + `/.gemdrive/images/${previewWidth}${encodePath(path)}`;
+  //return getFileUrl(root, rootUrl, 'previews', path);
 }
 
 function getFileUrl(root, rootUrl, type, path) {
