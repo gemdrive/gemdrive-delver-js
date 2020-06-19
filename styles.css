@@ -59,8 +59,17 @@ html {
   background-color: #ddd;
 }
 
-.remfs-delver__thumb {
-  height: 48px;
+.remfs-delver__thumb-container {
+  width: 64px;
+  height: 64px;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+}
+
+.remfs-delver__thumb-img {
+  max-height: 64px;
+  max-width: 64px;
 }
 
 .remfs-delver__list-item-filename {

@@ -218,8 +218,12 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
     const thumbUrl = rootUrl + '/.gemdrive/images/256' + encodePath(path);
 
     if (isImage(thumbUrl)) {
+      const thumbContainerEl = document.createElement('span');
+      thumbContainerEl.classList.add('remfs-delver__thumb-container');
+
       const thumbEl = document.createElement('img');
-      thumbEl.classList.add('remfs-delver__thumb');
+      thumbEl.classList.add('remfs-delver__thumb-img');
+      thumbContainerEl.appendChild(thumbEl);
 
       thumbnailPromise = fetch(thumbUrl + '?access_token=' + token)
       .then(response => response.blob());
@@ -229,7 +233,7 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
         thumbEl.src = url;
       })
 
-      iconContainerEl.replaceChild(thumbEl, iconContainerEl.firstChild);
+      iconContainerEl.replaceChild(thumbContainerEl, iconContainerEl.firstChild);
     }
   }
 
