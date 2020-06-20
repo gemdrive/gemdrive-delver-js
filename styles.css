@@ -57,6 +57,11 @@ html {
 .remfs-delver__list-item:hover {
 }
 
+.gemdrive-delver-list-item__icon-container {
+  font-size: 38px;
+  margin: 5px;
+}
+
 .remfs-delver__thumb-container {
   width: 64px;
   height: 64px;
@@ -145,6 +150,21 @@ html {
 .gemdrive-icon-row {
   display: flex;
   font-size: 48px;
+}
+
+.gemdrive-file-data {
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+}
+.gemdrive-file-data__filename {
+  font-weight: bold;
+  max-width: 75vw;
+  overflow-x: hidden;
+  white-space: nowrap;
+}
+.gemdrive-file-data__stats {
+  font-size: 14px;
 }
 
 /* large displays */

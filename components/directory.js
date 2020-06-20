@@ -1,4 +1,4 @@
-import { encodePath, removeAllChildren } from '../utils.js';
+import { encodePath, removeAllChildren, formatBytes } from '../utils.js';
 
 // https://stackoverflow.com/a/38641281/943814
 const naturalSorter = new Intl.Collator(undefined, {
@@ -154,7 +154,7 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
 
 
   const iconContainerEl = document.createElement('span');
-  iconContainerEl.classList.add('remfs-delver-list-item__icon-container');
+  iconContainerEl.classList.add('gemdrive-delver-list-item__icon-container');
   inner.appendChild(iconContainerEl);
 
   let thumbnailPromise;
@@ -170,18 +170,8 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
     iconContainerEl.appendChild(iconEl);
   }
 
-  const filenameEl = document.createElement('span');
-  filenameEl.classList.add('remfs-delver__list-item-filename');
-  filenameEl.innerText = filename;
-  inner.appendChild(filenameEl);
-
-
-  const itemControlsEl = document.createElement('span');
-  itemControlsEl.classList.add('remfs-delver-item__controls');
-  inner.appendChild(itemControlsEl);
-
-  if (item.type === 'file') {
-  }
+  const fileData = ItemDataView(filename, item);
+  inner.appendChild(fileData.dom);
 
   dom.addEventListener('click', (e) => {
 
@@ -302,6 +292,7 @@ const OpenExternalButton = (rootUrl, path) => {
   return dom;
 };
 
+
 const DownloadButton = (rootUrl, path) => {
   const dom = document.createElement('a');
   dom.classList.add('gemdrive-delver-icon-button');
@@ -319,6 +310,36 @@ const DownloadButton = (rootUrl, path) => {
   }
 
   return dom;
+};
+
+
+const ItemDataView = (filename, item) => {
+  const dom = document.createElement('div');
+  dom.classList.add('gemdrive-file-data');
+
+  const filenameEl = document.createElement('div');
+  filenameEl.classList.add('gemdrive-file-data__filename');
+  dom.appendChild(filenameEl);
+  filenameEl.innerText = filename;
+
+  if (item.type === 'file') {
+    const statsEl = document.createElement('div');
+    statsEl.classList.add('gemdrive-file-data__stats');
+    dom.appendChild(statsEl);
+    let statLine = formatBytes(item.size);
+
+    const firstPeriod = filename.indexOf('.');
+    if (firstPeriod) {
+      const ext = filename.slice(firstPeriod).toLowerCase();
+      statLine = ext + ' | ' + statLine;
+    }
+
+    statsEl.innerText = statLine;
+  }
+
+  return {
+    dom,
+  };
 };
 
 
