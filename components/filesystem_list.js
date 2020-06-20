@@ -6,7 +6,7 @@ export const FilesystemList = (filesystems) => {
   dom.classList.add('remfs-delver-filesystems-list');
 
   const header = document.createElement('h1');
-  header.innerText = "Filesystems:";
+  header.innerText = "Drives:";
   dom.appendChild(header);
 
   for (const key in filesystems) {
