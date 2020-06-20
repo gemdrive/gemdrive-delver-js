@@ -112,11 +112,14 @@ html {
   float: right;
 }
 
-.remfs-delver-button {
+.gemdrive-delver-icon-button {
   --color: #222;
-  font-size: 28px;
   text-decoration: none;
   color: var(--color);
+}
+.gemdrive-delver-icon-button:hover {
+  color: #fff;
+  background-color: var(--color);
 }
 
 .remfs-delver__checkbox {
@@ -137,6 +140,11 @@ html {
   width: 0%;
   height: 100%;
   transition: width 0.25s;
+}
+
+.gemdrive-icon-row {
+  display: flex;
+  font-size: 48px;
 }
 
 /* large displays */

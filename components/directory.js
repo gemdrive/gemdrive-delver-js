@@ -181,8 +181,6 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
   inner.appendChild(itemControlsEl);
 
   if (item.type === 'file') {
-    itemControlsEl.appendChild(DownloadButton(rootUrl, path));
-    itemControlsEl.appendChild(OpenExternalButton(rootUrl, path));
   }
 
   dom.addEventListener('click', (e) => {
@@ -203,6 +201,11 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
       showPreview = !showPreview;
 
       if (showPreview) {
+
+        const iconRow = IconRow(rootUrl, path);
+
+        previewEl.appendChild(iconRow.dom);
+
         if (isImage(filename)) {
           previewEl.appendChild(ImagePreview(root, rootUrl, path, thumbnailPromise, token));
         }
@@ -282,8 +285,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise, token) => {
 
 const OpenExternalButton = (rootUrl, path) => {
   const dom = document.createElement('a');
-  dom.classList.add('remfs-delver-button');
-  dom.classList.add('remfs-delver-open-external-button');
+  dom.classList.add('gemdrive-delver-icon-button');
   dom.href = rootUrl + encodePath(path);
   dom.setAttribute('target', '_blank');
   const iconEl = document.createElement('ion-icon');
@@ -302,8 +304,7 @@ const OpenExternalButton = (rootUrl, path) => {
 
 const DownloadButton = (rootUrl, path) => {
   const dom = document.createElement('a');
-  dom.classList.add('remfs-delver-button');
-  dom.classList.add('remfs-delver-download-button');
+  dom.classList.add('gemdrive-delver-icon-button');
   dom.href = rootUrl + encodePath(path) + '?download=true';
   dom.setAttribute('target', '_blank');
   const iconEl = document.createElement('ion-icon');
@@ -318,6 +319,23 @@ const DownloadButton = (rootUrl, path) => {
   }
 
   return dom;
+};
+
+
+const IconRow = (rootUrl, path) => {
+  const dom = document.createElement('div');
+  dom.classList.add('gemdrive-icon-row');
+
+  dom.appendChild(DownloadButton(rootUrl, path));
+  dom.appendChild(OpenExternalButton(rootUrl, path));
+
+  dom.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  return {
+    dom,
+  };
 };
 
 function getPreviewUrl(root, rootUrl, path, parentEl) {
