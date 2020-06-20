@@ -50,13 +50,11 @@ html {
   font-size: 18px;
   text-decoration: none;
   color: var(--color);
-  border-bottom: 2px solid #222;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 .remfs-delver__list-item:hover {
-  background-color: #ddd;
 }
 
 .remfs-delver__thumb-container {
@@ -89,9 +87,11 @@ html {
   padding-bottom: 5px;
   display: flex;
   align-items: center;
+  border-bottom: 2px solid #222;
 }
 
 .remfs-delver__list-content:hover {
+  background-color: #ddd;
 }
 
 .remfs-delver__preview {
