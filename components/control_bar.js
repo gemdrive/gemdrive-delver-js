@@ -5,6 +5,10 @@ export const ControlBar = () => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver-control-bar');
 
+  const btnContainerEl = document.createElement('div');
+  btnContainerEl.classList.add('remfs-delver-control-bar__buttons');
+  dom.appendChild(btnContainerEl);
+
   const locationEl = document.createElement('span');
   locationEl.classList.add('remfs-delver-control-bar__location');
   dom.appendChild(locationEl);
@@ -19,11 +23,9 @@ export const ControlBar = () => {
   curPathEl.innerText = "/";
   locationEl.appendChild(curPathEl);
 
-  const btnContainerEl = document.createElement('span');
-  btnContainerEl.classList.add('remfs-delver-control-bar__buttons');
-  dom.appendChild(btnContainerEl);
 
   const homeBtnEl = document.createElement('ion-icon');
+  homeBtnEl.classList.add('gemdrive-delver-icon-button');
   btnContainerEl.appendChild(homeBtnEl);
   homeBtnEl.name = 'home';
   homeBtnEl.addEventListener('click', (e) => {
@@ -33,6 +35,7 @@ export const ControlBar = () => {
   });
 
   const reloadBtnEl = document.createElement('ion-icon');
+  reloadBtnEl.classList.add('gemdrive-delver-icon-button');
   btnContainerEl.appendChild(reloadBtnEl);
   reloadBtnEl.name = 'refresh-circle';
   reloadBtnEl.addEventListener('click', (e) => {
@@ -42,6 +45,7 @@ export const ControlBar = () => {
   });
 
   const authBtnEl = document.createElement('ion-icon');
+  authBtnEl.classList.add('gemdrive-delver-icon-button');
   btnContainerEl.appendChild(authBtnEl);
   authBtnEl.name = 'key';
   authBtnEl.addEventListener('click', (e) => {
@@ -51,6 +55,7 @@ export const ControlBar = () => {
   });
 
   const uploadBtnEl = document.createElement('ion-icon');
+  uploadBtnEl.classList.add('gemdrive-delver-icon-button');
   uploadBtnEl.name = 'cloud-upload';
   uploadBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('upload', {
@@ -60,6 +65,7 @@ export const ControlBar = () => {
   btnContainerEl.appendChild(uploadBtnEl);
 
   const newDirBtnEl = document.createElement('ion-icon');
+  newDirBtnEl.classList.add('gemdrive-delver-icon-button');
   newDirBtnEl.name = 'add-circle';
   newDirBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('create-directory', {
@@ -72,6 +78,7 @@ export const ControlBar = () => {
   btnContainerEl.appendChild(copyBtnContainerEl);
 
   const copyBtnEl = document.createElement('ion-icon');
+  copyBtnEl.classList.add('gemdrive-delver-icon-button');
   copyBtnEl.name = 'copy';
   copyBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('copy', {
@@ -83,6 +90,7 @@ export const ControlBar = () => {
   btnContainerEl.appendChild(deleteBtnContainerEl);
 
   const deleteBtnEl = document.createElement('ion-icon');
+  deleteBtnEl.classList.add('gemdrive-delver-icon-button');
   deleteBtnEl.name = 'close-circle';
   deleteBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('delete', {
