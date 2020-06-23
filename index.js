@@ -35,9 +35,7 @@ const RemFSDelver = async (options) => {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('code') && urlParams.has('state')) {
 
-    const { accessToken, state } = await window.remfsAuthClient.completeAuthorization();
-
-    console.log(accessToken, state);
+    const { accessToken, state } = await window.gemdriveAuthClient.completeAuthorization();
 
     const fsUrl = state;
     if (!settings.filesystems[fsUrl]) {
@@ -467,7 +465,7 @@ async function validateUrl(url, settings) {
 }
 
 async function authorize(fsUrl) {
-  return window.remfsAuthClient.authorize({
+  return window.gemdriveAuthClient.authorize({
     driveUri: fsUrl,
     perms: [
       {
