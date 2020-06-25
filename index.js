@@ -87,6 +87,7 @@ const RemFSDelver = async (options) => {
     if (state.curPath && state.curPath.length > 0) {
       const parentPath = state.curPath.slice(0, state.curPath.length - 1);
       await navigate(state.curFsUrl, parentPath);
+      window.scrollTo(0, 0);
     }
     else {
       goHome();
@@ -155,6 +156,7 @@ const RemFSDelver = async (options) => {
 
   pageEl.addEventListener('select-dir', async (e) => {
     await navigate(e.detail.fsUrl, e.detail.path);
+    window.scrollTo(0, 0);
   });
 
   async function navigate(fsUrl, path) {
