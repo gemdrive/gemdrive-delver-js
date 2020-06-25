@@ -79,7 +79,21 @@ const RemFSDelver = async (options) => {
     }
   });
 
+  controlBar.dom.addEventListener('navigate-up', async (e) => {
+    if (state.curPath && state.curPath.length > 0) {
+      const parentPath = state.curPath.slice(0, state.curPath.length - 1);
+      await navigate(state.curFsUrl, parentPath);
+    }
+    else {
+      goHome();
+    }
+  });
+
   controlBar.dom.addEventListener('go-to-your-home', (e) => {
+    goHome();
+  });
+
+  function goHome() {
     removeAllChildren(pageEl);
     const fsList = FilesystemList(settings.filesystems);
     pageEl.appendChild(fsList.dom);
@@ -87,7 +101,7 @@ const RemFSDelver = async (options) => {
     state.curFsUrl = null;
     state.curPath = null;
     history.pushState(null, '', window.location.pathname);
-  });
+  }
 
   controlBar.dom.addEventListener('reload', (e) => {
     navigate(state.curFsUrl, state.curPath);

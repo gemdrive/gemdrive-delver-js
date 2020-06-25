@@ -11,16 +11,16 @@ const Directory = (state, root, dir, rootUrl, path, token) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
 
-  if (path.length > 0) {
-    const parentPath = path.slice();
-    parentPath.pop();
-    const parentPlaceholder = {
-      type: 'dir',
-    };
-    const listItem = ListItem({}, root, '..', parentPlaceholder, rootUrl, parentPath, token);
-    const upDir = listItem.dom;
-    dom.appendChild(upDir);
-  }
+  //if (path.length > 0) {
+  //  const parentPath = path.slice();
+  //  parentPath.pop();
+  //  const parentPlaceholder = {
+  //    type: 'dir',
+  //  };
+  //  const listItem = ListItem({}, root, '..', parentPlaceholder, rootUrl, parentPath, token);
+  //  const upDir = listItem.dom;
+  //  dom.appendChild(upDir);
+  //}
 
   const items = {};
 
@@ -119,38 +119,38 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
   previewEl.classList.add('preview');
   dom.appendChild(previewEl);
 
-  if (filename !== '..') {
-    const checkboxEl = document.createElement('input');
-    checkboxEl.classList.add('remfs-delver__checkbox');
-    checkboxEl.setAttribute('type', 'checkbox');
-    checkboxEl.checked = state && state.selected;
-    checkboxEl.addEventListener('click', (e) => {
+  //if (filename !== '..') {
+  const checkboxEl = document.createElement('input');
+  checkboxEl.classList.add('remfs-delver__checkbox');
+  checkboxEl.setAttribute('type', 'checkbox');
+  checkboxEl.checked = state && state.selected;
+  checkboxEl.addEventListener('click', (e) => {
 
-      e.stopPropagation();
+    e.stopPropagation();
 
-      if (checkboxEl.checked) {
-        dom.dispatchEvent(new CustomEvent('item-selected', {
-          bubbles: true,
-          detail: {
-            fsUrl: rootUrl,
-            path,
-            item,
-          },
-        }));
-      }
-      else {
-        dom.dispatchEvent(new CustomEvent('item-deselected', {
-          bubbles: true,
-          detail: {
-            fsUrl: rootUrl,
-            path,
-          },
-        }));
-      }
-    });
+    if (checkboxEl.checked) {
+      dom.dispatchEvent(new CustomEvent('item-selected', {
+        bubbles: true,
+        detail: {
+          fsUrl: rootUrl,
+          path,
+          item,
+        },
+      }));
+    }
+    else {
+      dom.dispatchEvent(new CustomEvent('item-deselected', {
+        bubbles: true,
+        detail: {
+          fsUrl: rootUrl,
+          path,
+        },
+      }));
+    }
+  });
 
-    inner.appendChild(checkboxEl);
-  }
+  inner.appendChild(checkboxEl);
+  //}
 
 
   const iconContainerEl = document.createElement('span');

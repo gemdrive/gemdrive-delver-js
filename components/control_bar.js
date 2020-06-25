@@ -24,6 +24,26 @@ export const ControlBar = () => {
   locationEl.appendChild(curPathEl);
 
 
+  //const backBtnEl = document.createElement('ion-icon');
+  //backBtnEl.classList.add('gemdrive-delver-icon-button');
+  //btnContainerEl.appendChild(backBtnEl);
+  //backBtnEl.name = 'arrow-back-outline';
+  //backBtnEl.addEventListener('click', (e) => {
+  //  dom.dispatchEvent(new CustomEvent('navigate-back', {
+  //    bubbles: true,
+  //  }));
+  //});
+
+  const upBtnEl = document.createElement('ion-icon');
+  upBtnEl.classList.add('gemdrive-delver-icon-button');
+  btnContainerEl.appendChild(upBtnEl);
+  upBtnEl.name = 'arrow-up-outline';
+  upBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('navigate-up', {
+      bubbles: true,
+    }));
+  });
+
   const homeBtnEl = document.createElement('ion-icon');
   homeBtnEl.classList.add('gemdrive-delver-icon-button');
   btnContainerEl.appendChild(homeBtnEl);
@@ -34,25 +54,25 @@ export const ControlBar = () => {
     }));
   });
 
-  const reloadBtnEl = document.createElement('ion-icon');
-  reloadBtnEl.classList.add('gemdrive-delver-icon-button');
-  btnContainerEl.appendChild(reloadBtnEl);
-  reloadBtnEl.name = 'refresh-circle';
-  reloadBtnEl.addEventListener('click', (e) => {
-    dom.dispatchEvent(new CustomEvent('reload', {
-      bubbles: true,
-    }));
-  });
+  //const reloadBtnEl = document.createElement('ion-icon');
+  //reloadBtnEl.classList.add('gemdrive-delver-icon-button');
+  //btnContainerEl.appendChild(reloadBtnEl);
+  //reloadBtnEl.name = 'refresh-circle';
+  //reloadBtnEl.addEventListener('click', (e) => {
+  //  dom.dispatchEvent(new CustomEvent('reload', {
+  //    bubbles: true,
+  //  }));
+  //});
 
-  const authBtnEl = document.createElement('ion-icon');
-  authBtnEl.classList.add('gemdrive-delver-icon-button');
-  btnContainerEl.appendChild(authBtnEl);
-  authBtnEl.name = 'key';
-  authBtnEl.addEventListener('click', (e) => {
-    dom.dispatchEvent(new CustomEvent('authorize', {
-      bubbles: true,
-    }));
-  });
+  //const authBtnEl = document.createElement('ion-icon');
+  //authBtnEl.classList.add('gemdrive-delver-icon-button');
+  //btnContainerEl.appendChild(authBtnEl);
+  //authBtnEl.name = 'key';
+  //authBtnEl.addEventListener('click', (e) => {
+  //  dom.dispatchEvent(new CustomEvent('authorize', {
+  //    bubbles: true,
+  //  }));
+  //});
 
   const uploadBtnEl = document.createElement('ion-icon');
   uploadBtnEl.classList.add('gemdrive-delver-icon-button');
