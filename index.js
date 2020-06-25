@@ -79,6 +79,10 @@ const RemFSDelver = async (options) => {
     }
   });
 
+  controlBar.dom.addEventListener('navigate-back', async (e) => {
+    window.history.back();
+  });
+
   controlBar.dom.addEventListener('navigate-up', async (e) => {
     if (state.curPath && state.curPath.length > 0) {
       const parentPath = state.curPath.slice(0, state.curPath.length - 1);
@@ -154,6 +158,11 @@ const RemFSDelver = async (options) => {
   });
 
   async function navigate(fsUrl, path) {
+    await goTo(fsUrl, path);
+    history.pushState(null, '', window.location.pathname + `?fs=${fsUrl}&path=${encodePath(path)}`);
+  }
+
+  async function goTo(fsUrl, path) {
 
     state.curFsUrl = fsUrl;
     state.curPath = path;
@@ -200,8 +209,6 @@ const RemFSDelver = async (options) => {
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
       controlBar.onLocationChange(fsUrl, path);
-
-      history.pushState(null, '', window.location.pathname + `?fs=${fsUrl}&path=${encodePath(path)}`);
     }
     else if (remfsResponse.status === 403) {
       const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
@@ -212,13 +219,19 @@ const RemFSDelver = async (options) => {
     }
   }
 
-  //window.onpopstate = (e) => {
-  //  const urlParams = new URLSearchParams(window.location.search);
-  //  const fsUrl = urlParams.get('fs');
-  //  const path = parsePath(urlParams.get('path'));
-  //  console.log(fsUrl, path);
-  //  navigate(fsUrl, path);
-  //};
+  window.onpopstate = (e) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const driveUri = urlParams.get('fs');
+    const pathStr = urlParams.get('path');
+
+    if (driveUri && pathStr) {
+      const path = parsePath(pathStr);
+      goTo(driveUri, path);
+    }
+    else {
+      goHome();
+    }
+  };
 
   // File uploads
   const uppie = new Uppie();

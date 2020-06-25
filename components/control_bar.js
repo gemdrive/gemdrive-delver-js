@@ -24,15 +24,15 @@ export const ControlBar = () => {
   locationEl.appendChild(curPathEl);
 
 
-  //const backBtnEl = document.createElement('ion-icon');
-  //backBtnEl.classList.add('gemdrive-delver-icon-button');
-  //btnContainerEl.appendChild(backBtnEl);
-  //backBtnEl.name = 'arrow-back-outline';
-  //backBtnEl.addEventListener('click', (e) => {
-  //  dom.dispatchEvent(new CustomEvent('navigate-back', {
-  //    bubbles: true,
-  //  }));
-  //});
+  const backBtnEl = document.createElement('ion-icon');
+  backBtnEl.classList.add('gemdrive-delver-icon-button');
+  btnContainerEl.appendChild(backBtnEl);
+  backBtnEl.name = 'arrow-back-outline';
+  backBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('navigate-back', {
+      bubbles: true,
+    }));
+  });
 
   const upBtnEl = document.createElement('ion-icon');
   upBtnEl.classList.add('gemdrive-delver-icon-button');
