@@ -1,4 +1,5 @@
 import { encodePath, removeAllChildren } from '../utils.js';
+import { OpenExternalButton } from './directory.js';
 
 
 export const ControlBar = () => {
@@ -118,11 +119,22 @@ export const ControlBar = () => {
     }));
   });
 
-  function onLocationChange(fsUrl, path) {
+  const openExtBtnContainerEl = document.createElement('span');
+  btnContainerEl.appendChild(openExtBtnContainerEl);
+
+  function onLocationChange(fsUrl, path, accessToken) {
     curFsEl.innerText = '[' + fsUrl + ']';
 
     const pathStr = encodePath(path);
     curPathEl.innerText = pathStr;
+
+    if (openExtBtnContainerEl.firstChild) {
+      openExtBtnContainerEl.removeChild(openExtBtnContainerEl.firstChild);
+    }
+
+    if (fsUrl.length > 0) {
+      openExtBtnContainerEl.appendChild(OpenExternalButton(fsUrl, encodePath(path) + '/', accessToken));
+    }
   }
 
   function onSelectedItemsChange(selectedItems) {

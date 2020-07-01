@@ -210,7 +210,7 @@ const RemFSDelver = async (options) => {
       const dir = Directory(dirState, remfsRoot, curDir, fsUrl, path, fs.accessToken);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
-      controlBar.onLocationChange(fsUrl, path);
+      controlBar.onLocationChange(fsUrl, path, fs.accessToken);
     }
     else if (remfsResponse.status === 403) {
       const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");

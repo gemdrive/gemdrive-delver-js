@@ -192,7 +192,7 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
 
       if (showPreview) {
 
-        const iconRow = IconRow(rootUrl, path);
+        const iconRow = IconRow(rootUrl, path, token);
 
         previewEl.appendChild(iconRow.dom);
 
@@ -272,8 +272,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise, token) => {
   return dom;
 };
 
-
-const OpenExternalButton = (rootUrl, path) => {
+const OpenExternalButtonOld = (rootUrl, path) => {
   const dom = document.createElement('a');
   dom.classList.add('gemdrive-delver-icon-button');
   dom.href = rootUrl + encodePath(path);
@@ -288,6 +287,43 @@ const OpenExternalButton = (rootUrl, path) => {
   if (rootPath !== '/') {
     authPathStr = decodeURIComponent(rootPath + '/' + authPathStr.slice(1));
   }
+
+  return dom;
+};
+
+const OpenExternalButton = (rootUrl, pathStr, token) => {
+  const dom = document.createElement('ion-icon');
+  dom.classList.add('gemdrive-delver-icon-button');
+  dom.name = 'open';
+
+  const rootPath = new URL(rootUrl).pathname;
+
+  let authPathStr = pathStr;
+  if (rootPath !== '/') {
+    authPathStr = decodeURIComponent(rootPath + '/' + authPathStr.slice(1));
+  }
+
+  dom.addEventListener('click', (e) => {
+
+    e.preventDefault();
+  
+    const childWindow = window.open('https://gemdrive.io/apps/launcher/');
+
+    window.addEventListener('message', (message) => {
+      if (message.data === 'child-ready') {
+        childWindow.postMessage({
+          command: 'run',
+          items: [
+            {
+              driveUri: rootUrl,
+              path: pathStr,
+              accessToken: token,
+            }
+          ],
+        });
+      }
+    });
+  });
 
   return dom;
 };
@@ -343,12 +379,12 @@ const ItemDataView = (filename, item) => {
 };
 
 
-const IconRow = (rootUrl, path) => {
+const IconRow = (rootUrl, path, token) => {
   const dom = document.createElement('div');
   dom.classList.add('gemdrive-icon-row');
 
   dom.appendChild(DownloadButton(rootUrl, path));
-  dom.appendChild(OpenExternalButton(rootUrl, path));
+  dom.appendChild(OpenExternalButton(rootUrl, encodePath(path), token));
 
   dom.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -382,4 +418,5 @@ function isImage(pathStr) {
 
 export {
   Directory,
+  OpenExternalButton,
 };
