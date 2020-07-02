@@ -216,7 +216,7 @@ const RemFSDelver = async (options) => {
       const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
 
       if (doAuth) {
-        authorize(fsUrl);
+        authorize(fsUrl, encodePath(path));
       }
     }
   }
@@ -493,14 +493,14 @@ async function validateUrl(url, settings) {
   };
 }
 
-async function authorize(fsUrl) {
+async function authorize(fsUrl, path) {
   return window.gemdriveAuthClient.authorize({
     driveUri: fsUrl,
     perms: [
       {
         type: 'dir',
-        perm: 'write',
-        path: '/',
+        perm: 'read',
+        path: path ? path : '/',
       }
     ],
     state: fsUrl,
