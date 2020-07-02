@@ -412,7 +412,9 @@ function getPreviewUrl(root, rootUrl, path, parentEl) {
 
 function isImage(pathStr) {
   const lower = pathStr.toLowerCase(pathStr);
-  return lower.endsWith('.jpg') || lower.endsWith('.jpeg');
+  return lower.endsWith('.jpg') ||
+    lower.endsWith('.jpeg') ||
+    lower.endsWidth('.png');
 }
 
 
