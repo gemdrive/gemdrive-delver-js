@@ -45,8 +45,8 @@ const RemFSDelver = async (options) => {
     localStorage.setItem('settings', JSON.stringify(settings));
   }
 
-  if (urlParams.has('fs') && urlParams.has('path')) {
-    navigate(urlParams.get('fs'), parsePath(urlParams.get('path')));
+  if (urlParams.has('drive') && urlParams.has('path')) {
+    navigate(urlParams.get('drive'), parsePath(urlParams.get('path')));
   }
 
   const fsList = FilesystemList(settings.filesystems);
@@ -161,7 +161,7 @@ const RemFSDelver = async (options) => {
 
   async function navigate(fsUrl, path) {
     await goTo(fsUrl, path);
-    history.pushState(null, '', window.location.pathname + `?fs=${fsUrl}&path=${encodePath(path)}`);
+    history.pushState(null, '', window.location.pathname + `?drive=${fsUrl}&path=${encodePath(path)}`);
   }
 
   async function goTo(fsUrl, path) {
@@ -223,7 +223,7 @@ const RemFSDelver = async (options) => {
 
   window.onpopstate = (e) => {
     const urlParams = new URLSearchParams(window.location.search);
-    const driveUri = urlParams.get('fs');
+    const driveUri = urlParams.get('drive');
     const pathStr = urlParams.get('path');
 
     if (driveUri && pathStr) {

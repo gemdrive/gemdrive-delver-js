@@ -272,7 +272,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise, token) => {
   return dom;
 };
 
-const OpenExternalButtonOld = (rootUrl, path) => {
+const OpenTabButton = (rootUrl, path) => {
   const dom = document.createElement('a');
   dom.classList.add('gemdrive-delver-icon-button');
   dom.href = rootUrl + encodePath(path);
@@ -384,7 +384,7 @@ const IconRow = (rootUrl, path, token) => {
   dom.classList.add('gemdrive-icon-row');
 
   dom.appendChild(DownloadButton(rootUrl, path));
-  dom.appendChild(OpenExternalButton(rootUrl, encodePath(path), token));
+  dom.appendChild(OpenTabButton(rootUrl, path));
 
   dom.addEventListener('click', (e) => {
     e.stopPropagation();
