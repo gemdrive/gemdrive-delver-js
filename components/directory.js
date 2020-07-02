@@ -414,7 +414,7 @@ function isImage(pathStr) {
   const lower = pathStr.toLowerCase(pathStr);
   return lower.endsWith('.jpg') ||
     lower.endsWith('.jpeg') ||
-    lower.endsWidth('.png');
+    lower.endsWith('.png');
 }
 
 
