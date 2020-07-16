@@ -7,7 +7,7 @@ const naturalSorter = new Intl.Collator(undefined, {
 });
 
 
-const Directory = (state, root, dir, rootUrl, path, token) => {
+const Directory = (state, dir, rootUrl, path, token) => {
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__directory');
 
@@ -46,7 +46,7 @@ const Directory = (state, root, dir, rootUrl, path, token) => {
     for (const filename of sortedNames) {
       const child = dir.children[filename];
       const childPath = path.concat(filename);
-      const listItem = ListItem(state.items[filename], root, filename, child, rootUrl, childPath, token)
+      const listItem = ListItem(state.items[filename], filename, child, rootUrl, childPath, token)
       items[filename] = listItem;
       listItem.dom.dataset.filename = filename;
       const childEl = listItem.dom;
@@ -74,7 +74,7 @@ const Directory = (state, root, dir, rootUrl, path, token) => {
 
     if (index > -1) {
       const childPath = path.concat(name);
-      const listItem = ListItem(state.items[name], root, name, child, rootUrl, childPath, token);
+      const listItem = ListItem(state.items[name], name, child, rootUrl, childPath, token);
       dom.insertBefore(
         listItem.dom,
         dom.childNodes[index]);
@@ -103,7 +103,7 @@ const Directory = (state, root, dir, rootUrl, path, token) => {
   return { dom, onAddChild, onRemoveChild };
 };
 
-const ListItem = (state, root, filename, item, rootUrl, path, token) => {
+const ListItem = (state, filename, item, rootUrl, path, token) => {
   //const dom = document.createElement('a');
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__list-item');
@@ -197,7 +197,7 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
         previewEl.appendChild(iconRow.dom);
 
         if (isImage(filename)) {
-          previewEl.appendChild(ImagePreview(root, rootUrl, path, thumbnailPromise, token));
+          previewEl.appendChild(ImagePreview(rootUrl, path, thumbnailPromise, token));
         }
       }
       else {
@@ -237,7 +237,7 @@ const ListItem = (state, root, filename, item, rootUrl, path, token) => {
 };
 
 
-const ImagePreview = (root, rootUrl, path, thumbnailPromise, token) => {
+const ImagePreview = (rootUrl, path, thumbnailPromise, token) => {
 
   const dom = document.createElement('div');
   dom.classList.add('remfs-delver__preview');
@@ -257,7 +257,7 @@ const ImagePreview = (root, rootUrl, path, thumbnailPromise, token) => {
     });
   }
 
-  const previewUrl = getPreviewUrl(root, rootUrl, path, dom);
+  const previewUrl = getPreviewUrl(rootUrl, path, dom);
 
   if (previewUrl) {
     fetch(previewUrl + '?access_token=' + token)
@@ -395,7 +395,7 @@ const IconRow = (rootUrl, path, token) => {
   };
 };
 
-function getPreviewUrl(root, rootUrl, path, parentEl) {
+function getPreviewUrl(rootUrl, path, parentEl) {
 
   let previewWidth = 512;
 

@@ -3,6 +3,7 @@ import { ControlBar } from './components/control_bar.js';
 import { FilesystemList } from './components/filesystem_list.js';
 import { Directory } from './components/directory.js';
 import { Progress } from './components/progress.js';
+//import { authorize as authz } from '/lib/auth/index.js';
 
 
 const RemFSDelver = async (options) => {
@@ -178,12 +179,17 @@ const RemFSDelver = async (options) => {
     }
 
     const remfsPath = [...path, 'remfs.json'];
+    const gemDataPath = ['gemdrive/meta', ...path, 'ls.tsv'];
     let reqUrl = fsUrl + encodePath(remfsPath);
+    let gemReqUrl = fsUrl + encodePath(gemDataPath);
     if (fs.accessToken) {
       reqUrl += '?access_token=' + fs.accessToken;
+      gemReqUrl += '?access_token=' + fs.accessToken;
     }
 
-    const remfsResponse = await fetch(reqUrl)
+    const remfsResponse = await fetch(reqUrl);
+    const gemDataResponse = await fetch(gemReqUrl).then(r => r.text());
+    //console.log(gemDataResponse);
 
     if (remfsResponse.status === 200) {
       const remfsRoot = await remfsResponse.json();
@@ -207,7 +213,7 @@ const RemFSDelver = async (options) => {
       }
 
       const curDir = remfsRoot;
-      const dir = Directory(dirState, remfsRoot, curDir, fsUrl, path, fs.accessToken);
+      const dir = Directory(dirState, curDir, fsUrl, path, fs.accessToken);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
       controlBar.onLocationChange(fsUrl, path, fs.accessToken);
@@ -495,6 +501,7 @@ async function validateUrl(url, settings) {
 
 async function authorize(fsUrl, path) {
   return window.gemdriveAuthClient.authorize({
+  //return authz({
     driveUri: fsUrl,
     perms: [
       {
