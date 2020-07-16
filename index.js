@@ -178,21 +178,17 @@ const RemFSDelver = async (options) => {
       localStorage.setItem('settings', JSON.stringify(settings));
     }
 
-    const remfsPath = [...path, 'remfs.json'];
     const gemDataPath = ['gemdrive/meta', ...path, 'ls.tsv'];
-    let reqUrl = fsUrl + encodePath(remfsPath);
     let gemReqUrl = fsUrl + encodePath(gemDataPath);
     if (fs.accessToken) {
-      reqUrl += '?access_token=' + fs.accessToken;
       gemReqUrl += '?access_token=' + fs.accessToken;
     }
 
-    const remfsResponse = await fetch(reqUrl);
-    const gemDataResponse = await fetch(gemReqUrl).then(r => r.text());
-    //console.log(gemDataResponse);
+    const gemDataResponse = await fetch(gemReqUrl);
 
-    if (remfsResponse.status === 200) {
-      const remfsRoot = await remfsResponse.json();
+    if (gemDataResponse.status === 200) {
+      const gemDataText = await gemDataResponse.text();
+      const gemData = parseGemDataTsv(gemDataText);
 
       // derive directory state from global state
       const dirState = {
@@ -212,13 +208,13 @@ const RemFSDelver = async (options) => {
         }
       }
 
-      const curDir = remfsRoot;
+      const curDir = gemData;
       const dir = Directory(dirState, curDir, fsUrl, path, fs.accessToken);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
       controlBar.onLocationChange(fsUrl, path, fs.accessToken);
     }
-    else if (remfsResponse.status === 403) {
+    else if (gemDataResponse.status === 403) {
       const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
 
       if (doAuth) {
@@ -418,6 +414,42 @@ const RemFSDelver = async (options) => {
   return dom;
 };
 
+function parseGemDataTsv(text) {
+  const children = text.split('\n')
+    .map(line => line.split('\t'));
+
+  const gemData = {
+    type: 'dir',
+    children: {},
+  };
+
+  for (const child of children) {
+    if (child.length !== 3) {
+      continue;
+    }
+
+    let filename = child[0];
+    let type;
+    if (filename.endsWith('/')) {
+      type = 'dir';
+      filename = filename.slice(0, -1);
+    }
+    else {
+      type = 'file';
+    }
+
+    const modTime = child[1];
+    const size = child[2];
+    gemData.children[filename] = {
+      type,
+      size,
+      modTime,
+    };
+  }
+
+  return gemData;
+}
+
 function buildSelectedUrls(state, settings) {
   let numItems = 0;
   const selectedUrls = [];
@@ -483,7 +515,8 @@ async function validateUrl(url, settings) {
   }
 
   try {
-    const fetchUrl = remfsUrl + '/remfs.json';
+    const fetchUrl = remfsUrl + '/gemdrive/meta/ls.tsv';
+    console.log(fetchUrl);
     const response = await fetch(fetchUrl);
 
     if (response.status !== 200) {
