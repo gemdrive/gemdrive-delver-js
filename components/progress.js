@@ -5,11 +5,11 @@ export const Progress = (total) => {
   const dom = document.createElement('div');
 
   const barContainer = document.createElement('div');
-  barContainer.classList.add('remfs-progress-bar__container');
+  barContainer.classList.add('gemdrive-progress-bar__container');
   dom.appendChild(barContainer);
 
   const bar = document.createElement('div');
-  bar.classList.add('remfs-progress-bar');
+  bar.classList.add('gemdrive-progress-bar');
   barContainer.appendChild(bar);
 
   const text = document.createElement('div');

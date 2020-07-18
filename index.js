@@ -6,7 +6,7 @@ import { Progress } from './components/progress.js';
 //import { authorize as authz } from '/lib/auth/index.js';
 
 
-const RemFSDelver = async (options) => {
+const GemDriveDelver = async (options) => {
 
   const state = {
     curFsUrl: null,
@@ -15,13 +15,13 @@ const RemFSDelver = async (options) => {
   };
 
   const dom = document.createElement('div');
-  dom.classList.add('remfs-delver');
+  dom.classList.add('gemdrive-delver');
 
   const controlBar = ControlBar();
   dom.appendChild(controlBar.dom);
 
   const pageEl = document.createElement('div');
-  pageEl.classList.add('remfs-delver__dir-container');
+  pageEl.classList.add('gemdrive-delver__dir-container');
   dom.appendChild(pageEl);
 
   let settings = JSON.parse(localStorage.getItem('settings'));
@@ -64,7 +64,7 @@ const RemFSDelver = async (options) => {
         const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
 
         if (doAuth) {
-          authorize(result.remfsUrl);
+          authorize(result.gemUrl);
         }
       }
       else {
@@ -73,10 +73,10 @@ const RemFSDelver = async (options) => {
     }
     else {
       const filesystem = {};
-      settings.filesystems[result.remfsUrl] = filesystem;
+      settings.filesystems[result.gemUrl] = filesystem;
       localStorage.setItem('settings', JSON.stringify(settings));
 
-      fsList.addFilesystem(result.remfsUrl, filesystem);
+      fsList.addFilesystem(result.gemUrl, filesystem);
     }
   });
 
@@ -284,7 +284,7 @@ const RemFSDelver = async (options) => {
           return response.json()
         }
       })
-      .then(remfs => {
+      .then(gemData => {
         // TODO: This is a hack. Will probably need to dynamically update
         // at some point.
         navigate(state.curFsUrl, state.curPath);
@@ -497,30 +497,30 @@ const InvisibleFolderInput = () => {
 async function validateUrl(url, settings) {
   // Ensure protocol is set. Use https unless url is localhost or protocol is
   // explicitly set already.
-  let remfsUrl;
+  let gemUrl;
   if (url.startsWith('http')) {
-    remfsUrl = url;
+    gemUrl = url;
   }
   else {
     if (url.startsWith('localhost')) {
-      remfsUrl = 'http://' + url;
+      gemUrl = 'http://' + url;
     }
     else {
-      remfsUrl = 'https://' + url;
+      gemUrl = 'https://' + url;
     }
   }
 
-  if (settings.filesystems[remfsUrl] !== undefined) {
+  if (settings.filesystems[gemUrl] !== undefined) {
     return { err: "Filesystem already exists" };
   }
 
   try {
-    const fetchUrl = remfsUrl + '/gemdrive/meta/ls.tsv';
+    const fetchUrl = gemUrl + '/gemdrive/meta/ls.tsv';
     console.log(fetchUrl);
     const response = await fetch(fetchUrl);
 
     if (response.status !== 200) {
-      return { err: response.status, remfsUrl };
+      return { err: response.status, gemUrl };
     }
   }
   catch(e) {
@@ -528,7 +528,7 @@ async function validateUrl(url, settings) {
   }
 
   return {
-    remfsUrl
+    gemUrl
   };
 }
 
@@ -549,5 +549,5 @@ async function authorize(fsUrl, path) {
 
 
 export {
-  RemFSDelver,
+  GemDriveDelver,
 };

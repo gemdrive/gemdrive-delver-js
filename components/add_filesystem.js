@@ -1,6 +1,6 @@
 export const AddFilesystem = (filesystems) => {
   const dom = document.createElement('div');
-  dom.classList.add('remfs-delver-add-filesystem');
+  dom.classList.add('gemdrive-delver-add-filesystem');
 
   const promptEl = document.createElement('span');
   promptEl.innerText = "Filesystem URL:";

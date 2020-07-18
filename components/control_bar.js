@@ -4,23 +4,23 @@ import { OpenExternalButton } from './directory.js';
 
 export const ControlBar = () => {
   const dom = document.createElement('div');
-  dom.classList.add('remfs-delver-control-bar');
+  dom.classList.add('gemdrive-delver-control-bar');
 
   const btnContainerEl = document.createElement('div');
-  btnContainerEl.classList.add('remfs-delver-control-bar__buttons');
+  btnContainerEl.classList.add('gemdrive-delver-control-bar__buttons');
   dom.appendChild(btnContainerEl);
 
   const locationEl = document.createElement('span');
-  locationEl.classList.add('remfs-delver-control-bar__location');
+  locationEl.classList.add('gemdrive-delver-control-bar__location');
   dom.appendChild(locationEl);
 
   const curFsEl = document.createElement('span');
-  curFsEl.classList.add('remfs-delver-control-bar__fs-url');
+  curFsEl.classList.add('gemdrive-delver-control-bar__fs-url');
   curFsEl.innerText = "[]";
   locationEl.appendChild(curFsEl);
 
   const curPathEl = document.createElement('span');
-  curPathEl.classList.add('remfs-delver-control-bar__path');
+  curPathEl.classList.add('gemdrive-delver-control-bar__path');
   curPathEl.innerText = "/";
   locationEl.appendChild(curPathEl);
 

@@ -9,7 +9,7 @@ const naturalSorter = new Intl.Collator(undefined, {
 
 const Directory = (state, dir, rootUrl, path, token) => {
   const dom = document.createElement('div');
-  dom.classList.add('remfs-delver__directory');
+  dom.classList.add('gemdrive-delver__directory');
 
   //if (path.length > 0) {
   //  const parentPath = path.slice();
@@ -106,13 +106,13 @@ const Directory = (state, dir, rootUrl, path, token) => {
 const ListItem = (state, filename, item, rootUrl, path, token) => {
   //const dom = document.createElement('a');
   const dom = document.createElement('div');
-  dom.classList.add('remfs-delver__list-item');
+  dom.classList.add('gemdrive-delver__list-item');
   //dom.setAttribute('href', rootUrl + encodePath(path));
 
   let showPreview = false;
 
   const inner = document.createElement('div');
-  inner.classList.add('remfs-delver__list-content');
+  inner.classList.add('gemdrive-delver__list-content');
   dom.appendChild(inner);
 
   const previewEl = document.createElement('div');
@@ -121,7 +121,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
 
   //if (filename !== '..') {
   const checkboxEl = document.createElement('input');
-  checkboxEl.classList.add('remfs-delver__checkbox');
+  checkboxEl.classList.add('gemdrive-delver__checkbox');
   checkboxEl.setAttribute('type', 'checkbox');
   checkboxEl.checked = state && state.selected;
   checkboxEl.addEventListener('click', (e) => {
@@ -212,10 +212,10 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
 
     if (isImage(thumbUrl)) {
       const thumbContainerEl = document.createElement('span');
-      thumbContainerEl.classList.add('remfs-delver__thumb-container');
+      thumbContainerEl.classList.add('gemdrive-delver__thumb-container');
 
       const thumbEl = document.createElement('img');
-      thumbEl.classList.add('remfs-delver__thumb-img');
+      thumbEl.classList.add('gemdrive-delver__thumb-img');
       thumbContainerEl.appendChild(thumbEl);
 
       thumbnailPromise = fetch(thumbUrl + '?access_token=' + token)
@@ -240,10 +240,10 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
 const ImagePreview = (rootUrl, path, thumbnailPromise, token) => {
 
   const dom = document.createElement('div');
-  dom.classList.add('remfs-delver__preview');
+  dom.classList.add('gemdrive-delver__preview');
 
   const imageEl = document.createElement('img');
-  imageEl.classList.add('remfs-delver__preview-image');
+  imageEl.classList.add('gemdrive-delver__preview-image');
   dom.appendChild(imageEl);
 
   let loaded = false;

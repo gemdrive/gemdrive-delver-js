@@ -3,7 +3,7 @@ import { AddFilesystem } from './add_filesystem.js';
 
 export const FilesystemList = (filesystems) => {
   const dom = document.createElement('div');
-  dom.classList.add('remfs-delver-filesystems-list');
+  dom.classList.add('gemdrive-delver-filesystems-list');
 
   const header = document.createElement('h1');
   header.innerText = "Drives:";
@@ -16,7 +16,7 @@ export const FilesystemList = (filesystems) => {
 
   function appendFilesystem(url, filesystem) {
     const filesystemEl = document.createElement('div');
-    filesystemEl.classList.add('remfs-delver__list-content');
+    filesystemEl.classList.add('gemdrive-delver__list-content');
     filesystemEl.innerText = url;
     filesystemEl.addEventListener('click', (e) => {
       dom.dispatchEvent(new CustomEvent('select-filesystem', {

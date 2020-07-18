@@ -6,7 +6,7 @@ html {
   font-family: Verdana;
 }
 
-.remfs-delver-control-bar {
+.gemdrive-delver-control-bar {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -24,29 +24,29 @@ html {
   width: 0px;
 }
 
-.remfs-delver-control-bar__buttons {
+.gemdrive-delver-control-bar__buttons {
   margin: 5px;
 }
 
-.remfs-delver-control-bar__location {
+.gemdrive-delver-control-bar__location {
   display: flex;
   flex-direction: column;
 }
-.remfs-delver-control-bar__fs-url {
+.gemdrive-delver-control-bar__fs-url {
   font-weight: normal;
   font-size: 16px;
   padding-left: 10px;
 }
-.remfs-delver-control-bar__path {
+.gemdrive-delver-control-bar__path {
   font-size: 22px;
   padding-left: 5px;
 }
 
-.remfs-delver__directory {
+.gemdrive-delver__directory {
   border-top: 2px solid #222;
 }
 
-.remfs-delver__list-item {
+.gemdrive-delver__list-item {
   --color: #222;
   font-size: 18px;
   text-decoration: none;
@@ -55,7 +55,7 @@ html {
   flex-direction: column;
   justify-content: center;
 }
-.remfs-delver__list-item:hover {
+.gemdrive-delver__list-item:hover {
 }
 
 .gemdrive-delver-list-item__icon-container {
@@ -63,7 +63,7 @@ html {
   margin: 5px;
 }
 
-.remfs-delver__thumb-container {
+.gemdrive-delver__thumb-container {
   width: 64px;
   height: 64px;
   background-color: #000;
@@ -71,23 +71,23 @@ html {
   align-items: center;
 }
 
-.remfs-delver__thumb-img {
+.gemdrive-delver__thumb-img {
   width: 100%;
   height: 100%; 
   object-fit: contain;
 }
 
-.remfs-delver__list-item-filename {
+.gemdrive-delver__list-item-filename {
   margin-left: 4px;
   max-width: 75%;
   overflow-x: hidden;
 }
 
-.remfs-delver__list-item:visited {
+.gemdrive-delver__list-item:visited {
   color: var(--color);
 }
 
-.remfs-delver__list-content {
+.gemdrive-delver__list-content {
   height: 64px;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -96,11 +96,11 @@ html {
   border-bottom: 2px solid #222;
 }
 
-.remfs-delver__list-content:hover {
+.gemdrive-delver__list-content:hover {
   background-color: #ddd;
 }
 
-.remfs-delver__preview {
+.gemdrive-delver__preview {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -108,13 +108,13 @@ html {
   height: 340px;
 }
 
-.remfs-delver__preview-image {
+.gemdrive-delver__preview-image {
   width: 100%;
   height: 100%; 
   object-fit: contain;
 }
 
-.remfs-delver-item__controls {
+.gemdrive-delver-item__controls {
   float: right;
 }
 
@@ -130,7 +130,7 @@ html {
   background-color: var(--color);
 }
 
-.remfs-delver__checkbox {
+.gemdrive-delver__checkbox {
   width: 30px;
   height: 30px;
   margin: 5px;
@@ -138,12 +138,12 @@ html {
   flex-shrink: 0;
 }
 
-.remfs-progress-bar__container {
+.gemdrive-progress-bar__container {
   height: 20px;
   border: 2px solid black;
 }
 
-.remfs-progress-bar {
+.gemdrive-progress-bar {
   background-color: #aaa;
   width: 0%;
   height: 100%;
@@ -173,7 +173,7 @@ html {
 /* large displays */
 @media (min-width: 1281px) {
 
-  .remfs-delver__checkbox {
+  .gemdrive-delver__checkbox {
     width: 20px;
     height: 20px;
     margin: 5px;

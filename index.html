@@ -19,16 +19,16 @@
 
     <script src='https://cdn.jsdelivr.net/gh/gemdrive/gemdrive-auth-client@0.8.0/dist/umd.js'></script>
     <!--
-    <script src='./lib/remfs-auth-client/dist/umd.js'></script>
+    <script src='./lib/gemdrive-auth-client/dist/umd.js'></script>
     -->
     <script src="./deps/uppie/uppie.min.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule="" src="https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.js"></script>
     <script type='module'>
-      import { RemFSDelver } from './index.js';
+      import { GemDriveDelver } from './index.js';
 
       (async () => {
-        const delverEl = await RemFSDelver({
+        const delverEl = await GemDriveDelver({
           secure: false,
         });
         document.querySelector('.content').appendChild(delverEl);
