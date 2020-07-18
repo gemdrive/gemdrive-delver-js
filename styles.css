@@ -32,7 +32,7 @@ html {
   display: flex;
   flex-direction: column;
 }
-.gemdrive-delver-control-bar__fs-url {
+.gemdrive-delver-control-bar__drive-url {
   font-weight: normal;
   font-size: 16px;
   padding-left: 10px;

@@ -132,7 +132,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
       dom.dispatchEvent(new CustomEvent('item-selected', {
         bubbles: true,
         detail: {
-          fsUrl: rootUrl,
+          driveUri: rootUrl,
           path,
           item,
         },
@@ -142,7 +142,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
       dom.dispatchEvent(new CustomEvent('item-deselected', {
         bubbles: true,
         detail: {
-          fsUrl: rootUrl,
+          driveUri: rootUrl,
           path,
         },
       }));
@@ -180,7 +180,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
       dom.dispatchEvent(new CustomEvent('select-dir', {
         bubbles: true,
         detail: {
-          fsUrl: rootUrl,
+          driveUri: rootUrl,
           path,
         },
       }));

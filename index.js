@@ -1,6 +1,6 @@
 import { parsePath, encodePath, removeAllChildren } from './utils.js';
 import { ControlBar } from './components/control_bar.js';
-import { FilesystemList } from './components/filesystem_list.js';
+import { DriveList } from './components/drive_list.js';
 import { Directory } from './components/directory.js';
 import { Progress } from './components/progress.js';
 //import { authorize as authz } from '/lib/auth/index.js';
@@ -9,7 +9,7 @@ import { Progress } from './components/progress.js';
 const GemDriveDelver = async (options) => {
 
   const state = {
-    curFsUrl: null,
+    curDriveUri: null,
     curPath: null,
     selectedItems: {},
   };
@@ -27,7 +27,7 @@ const GemDriveDelver = async (options) => {
   let settings = JSON.parse(localStorage.getItem('settings'));
   if (settings === null) {
     settings = {
-      filesystems: {},
+      drives: {},
     };
     localStorage.setItem('settings', JSON.stringify(settings));
   }
@@ -38,11 +38,11 @@ const GemDriveDelver = async (options) => {
 
     const { accessToken, state } = await window.gemdriveAuthClient.completeAuthorization();
 
-    const fsUrl = state;
-    if (!settings.filesystems[fsUrl]) {
-      settings.filesystems[fsUrl] = {};
+    const driveUri = state;
+    if (!settings.drives[driveUri]) {
+      settings.drives[driveUri] = {};
     }
-    settings.filesystems[fsUrl].accessToken = accessToken;
+    settings.drives[driveUri].accessToken = accessToken;
     localStorage.setItem('settings', JSON.stringify(settings));
   }
 
@@ -50,14 +50,14 @@ const GemDriveDelver = async (options) => {
     navigate(urlParams.get('drive'), parsePath(urlParams.get('path')));
   }
 
-  const fsList = FilesystemList(settings.filesystems);
-  pageEl.appendChild(fsList.dom);
+  const driveList = DriveList(settings.drives);
+  pageEl.appendChild(driveList.dom);
 
-  pageEl.addEventListener('add-filesystem', async (e) => {
+  pageEl.addEventListener('add-drive', async (e) => {
 
-    const fsUrl = e.detail.url;
+    const driveUri = e.detail.url;
 
-    const result = await validateUrl(fsUrl, settings);
+    const result = await validateUrl(driveUri, settings);
 
     if (result.err) {
       if (result.err === 403) {
@@ -72,11 +72,11 @@ const GemDriveDelver = async (options) => {
       }
     }
     else {
-      const filesystem = {};
-      settings.filesystems[result.gemUrl] = filesystem;
+      const drive = {};
+      settings.drives[result.gemUrl] = drive;
       localStorage.setItem('settings', JSON.stringify(settings));
 
-      fsList.addFilesystem(result.gemUrl, filesystem);
+      driveList.addDrive(result.gemUrl, drive);
     }
   });
 
@@ -87,7 +87,7 @@ const GemDriveDelver = async (options) => {
   controlBar.dom.addEventListener('navigate-up', async (e) => {
     if (state.curPath && state.curPath.length > 0) {
       const parentPath = state.curPath.slice(0, state.curPath.length - 1);
-      await navigate(state.curFsUrl, parentPath);
+      await navigate(state.curDriveUri, parentPath);
       window.scrollTo(0, 0);
     }
     else {
@@ -101,16 +101,16 @@ const GemDriveDelver = async (options) => {
 
   function goHome() {
     removeAllChildren(pageEl);
-    const fsList = FilesystemList(settings.filesystems);
-    pageEl.appendChild(fsList.dom);
+    const driveList = DriveList(settings.drives);
+    pageEl.appendChild(driveList.dom);
     controlBar.onLocationChange('', []);
-    state.curFsUrl = null;
+    state.curDriveUri = null;
     state.curPath = null;
     history.pushState(null, '', window.location.pathname);
   }
 
   controlBar.dom.addEventListener('reload', (e) => {
-    navigate(state.curFsUrl, state.curPath);
+    navigate(state.curDriveUri, state.curPath);
   });
   
   controlBar.dom.addEventListener('create-directory', (e) => {
@@ -119,11 +119,11 @@ const GemDriveDelver = async (options) => {
     if (dirName) {
 
       const newDirPath = [...state.curPath, dirName];
-      let createDirReqUrl = state.curFsUrl + encodePath(newDirPath) + '/';
+      let createDirReqUrl = state.curDriveUri + encodePath(newDirPath) + '/';
 
-      const fs = settings.filesystems[state.curFsUrl];
-      if (fs.accessToken) {
-        createDirReqUrl += '?access_token=' + fs.accessToken;
+      const drive = settings.drives[state.curDriveUri];
+      if (drive.accessToken) {
+        createDirReqUrl += '?access_token=' + drive.accessToken;
       }
 
       fetch(createDirReqUrl, {
@@ -131,13 +131,13 @@ const GemDriveDelver = async (options) => {
       })
       .then((response) => {
         if (response.status === 200) {
-          navigate(state.curFsUrl, state.curPath);
+          navigate(state.curDriveUri, state.curPath);
         }
         else if (response.status === 403) {
           const doAuth = confirm("Unauthorized to create. Do you want to attempt authorization?");
 
           if (doAuth) {
-            authorize(state.curFsUrl);
+            authorize(state.curDriveUri);
           }
         }
         else {
@@ -150,38 +150,38 @@ const GemDriveDelver = async (options) => {
     }
   });
 
-  pageEl.addEventListener('select-filesystem', async (e) => {
-    const fsUrl = e.detail.url;
-    await navigate(fsUrl, []);
+  pageEl.addEventListener('select-drive', async (e) => {
+    const driveUri = e.detail.url;
+    await navigate(driveUri, []);
   });
 
   pageEl.addEventListener('select-dir', async (e) => {
-    await navigate(e.detail.fsUrl, e.detail.path);
+    await navigate(e.detail.driveUri, e.detail.path);
     window.scrollTo(0, 0);
   });
 
-  async function navigate(fsUrl, path) {
-    await goTo(fsUrl, path);
-    history.pushState(null, '', window.location.pathname + `?drive=${fsUrl}&path=${encodePath(path)}`);
+  async function navigate(driveUri, path) {
+    await goTo(driveUri, path);
+    history.pushState(null, '', window.location.pathname + `?drive=${driveUri}&path=${encodePath(path)}`);
   }
 
-  async function goTo(fsUrl, path) {
+  async function goTo(driveUri, path) {
 
-    state.curFsUrl = fsUrl;
+    state.curDriveUri = driveUri;
     state.curPath = path;
 
-    let fs = settings.filesystems[fsUrl];
+    let drive = settings.drives[driveUri];
 
-    if (!fs) {
-      fs = {};
-      settings.filesystems[fsUrl] = fs;
+    if (!drive) {
+      drive = {};
+      settings.drives[driveUri] = drive;
       localStorage.setItem('settings', JSON.stringify(settings));
     }
 
     const gemDataPath = ['gemdrive/meta', ...path, 'ls.tsv'];
-    let gemReqUrl = fsUrl + encodePath(gemDataPath);
-    if (fs.accessToken) {
-      gemReqUrl += '?access_token=' + fs.accessToken;
+    let gemReqUrl = driveUri + encodePath(gemDataPath);
+    if (drive.accessToken) {
+      gemReqUrl += '?access_token=' + drive.accessToken;
     }
 
     const gemDataResponse = await fetch(gemReqUrl);
@@ -195,8 +195,8 @@ const GemDriveDelver = async (options) => {
         items: {},
       };
 
-      if (state.selectedItems[fsUrl]) {
-        for (const pathStr in state.selectedItems[fsUrl]) {
+      if (state.selectedItems[driveUri]) {
+        for (const pathStr in state.selectedItems[driveUri]) {
           const selPath = parsePath(pathStr);
           const selFilename = selPath[selPath.length - 1];
           const selPathParent = selPath.slice(0, selPath.length - 1);
@@ -209,16 +209,16 @@ const GemDriveDelver = async (options) => {
       }
 
       const curDir = gemData;
-      const dir = Directory(dirState, curDir, fsUrl, path, fs.accessToken);
+      const dir = Directory(dirState, curDir, driveUri, path, drive.accessToken);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
-      controlBar.onLocationChange(fsUrl, path, fs.accessToken);
+      controlBar.onLocationChange(driveUri, path, drive.accessToken);
     }
     else if (gemDataResponse.status === 403) {
       const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
 
       if (doAuth) {
-        authorize(fsUrl, encodePath(path));
+        authorize(driveUri, encodePath(path));
       }
     }
   }
@@ -245,14 +245,14 @@ const GemDriveDelver = async (options) => {
       const file = param[1];
 
       const uploadPath = [...state.curPath, file.name];
-      let uploadUrl = state.curFsUrl + encodePath(uploadPath);
+      let uploadUrl = state.curDriveUri + encodePath(uploadPath);
 
       let sseUrl = uploadUrl + '?events=true';
 
-      const fs = settings.filesystems[state.curFsUrl];
-      if (fs.accessToken) {
-        uploadUrl += '?access_token=' + fs.accessToken;
-        sseUrl += '&access_token=' + fs.accessToken;
+      const drive = settings.drives[state.curDriveUri];
+      if (drive.accessToken) {
+        uploadUrl += '?access_token=' + drive.accessToken;
+        sseUrl += '&access_token=' + drive.accessToken;
       }
 
       const uploadProgress = Progress(file.size);
@@ -277,7 +277,7 @@ const GemDriveDelver = async (options) => {
           const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
 
           if (doAuth) {
-            authorize(state.curFsUrl);
+            authorize(state.curDriveUri);
           }
         }
         else {
@@ -287,7 +287,7 @@ const GemDriveDelver = async (options) => {
       .then(gemData => {
         // TODO: This is a hack. Will probably need to dynamically update
         // at some point.
-        navigate(state.curFsUrl, state.curPath);
+        navigate(state.curDriveUri, state.curPath);
       })
       .catch(e => {
         console.error(e);
@@ -304,23 +304,23 @@ const GemDriveDelver = async (options) => {
   dom.appendChild(folderInput);
 
   controlBar.dom.addEventListener('upload', (e) => {
-    if (state.curFsUrl) {
+    if (state.curDriveUri) {
       fileInput.click();
     }
   });
 
   pageEl.addEventListener('item-selected', (e) => {
-    const { fsUrl, path, item } = e.detail;
-    const selectUrl = fsUrl + encodePath(path);
-    if (!state.selectedItems[fsUrl]) {
-      state.selectedItems[fsUrl] = {};
+    const { driveUri, path, item } = e.detail;
+    const selectUrl = driveUri + encodePath(path);
+    if (!state.selectedItems[driveUri]) {
+      state.selectedItems[driveUri] = {};
     }
-    state.selectedItems[fsUrl][encodePath(path)] = item;
+    state.selectedItems[driveUri][encodePath(path)] = item;
     controlBar.onSelectedItemsChange(state.selectedItems);
   });
   pageEl.addEventListener('item-deselected', (e) => {
-    const { fsUrl, path } = e.detail;
-    delete state.selectedItems[fsUrl][encodePath(path)];
+    const { driveUri, path } = e.detail;
+    delete state.selectedItems[driveUri][encodePath(path)];
     controlBar.onSelectedItemsChange(state.selectedItems);
   });
 
@@ -332,18 +332,18 @@ const GemDriveDelver = async (options) => {
     
     if (doIt) {
 
-      const fs = settings.filesystems[state.curFsUrl];
+      const drive = settings.drives[state.curDriveUri];
 
       for (let i = 0; i < selectedUrls.length; i++) {
         const url = selectedUrls[i];
         const item = selectedItems[i];
 
-        let copyCommandUrl = state.curFsUrl + encodePath(state.curPath) + '?remfs-method=remote-download&url=' + encodeURIComponent(url);
-        let sseUrl = state.curFsUrl + encodePath(state.curPath) + '?events=true';
+        let copyCommandUrl = state.curDriveUri + encodePath(state.curPath) + '?remfs-method=remote-download&url=' + encodeURIComponent(url);
+        let sseUrl = state.curDriveUri + encodePath(state.curPath) + '?events=true';
 
-        if (fs.accessToken) {
-          copyCommandUrl += '&access_token=' + fs.accessToken;
-          sseUrl += '&access_token=' + fs.accessToken;
+        if (drive.accessToken) {
+          copyCommandUrl += '&access_token=' + drive.accessToken;
+          sseUrl += '&access_token=' + drive.accessToken;
         }
 
         const progress = Progress(item.size);
@@ -363,7 +363,7 @@ const GemDriveDelver = async (options) => {
           await fetch(copyCommandUrl)
           state.selectedItems = {};
           controlBar.onSelectedItemsChange(state.selectedItems);
-          navigate(state.curFsUrl, state.curPath);
+          navigate(state.curDriveUri, state.curPath);
         }
         catch (e) {
           alert("Failed to copy");
@@ -373,7 +373,7 @@ const GemDriveDelver = async (options) => {
   });
 
   controlBar.dom.addEventListener('authorize', (e) => {
-    authorize(state.curFsUrl);
+    authorize(state.curDriveUri);
   });
 
   controlBar.dom.addEventListener('delete', (e) => {
@@ -391,13 +391,13 @@ const GemDriveDelver = async (options) => {
           if (response.status === 200) {
             state.selectedItems = {};
             controlBar.onSelectedItemsChange(state.selectedItems);
-            navigate(state.curFsUrl, state.curPath);
+            navigate(state.curDriveUri, state.curPath);
           }
           else if (response.status === 403) {
             const doAuth = confirm("Unauthorized to delete. Do you want to attempt authorization?");
 
             if (doAuth) {
-              authorize(state.curFsUrl);
+              authorize(state.curDriveUri);
             }
           }
           else {
@@ -455,18 +455,18 @@ function buildSelectedUrls(state, settings) {
   const selectedUrls = [];
   const selectedItems = [];
 
-  for (const fsUrl in state.selectedItems) {
+  for (const driveUri in state.selectedItems) {
 
-    const fs = settings.filesystems[fsUrl];
+    const drive = settings.drives[driveUri];
 
-    for (const itemKey in state.selectedItems[fsUrl]) {
+    for (const itemKey in state.selectedItems[driveUri]) {
       numItems += 1;
-      let selectedUrl = fsUrl + itemKey;
-      if (fs.accessToken) {
-        selectedUrl += '?access_token=' + fs.accessToken;
+      let selectedUrl = driveUri + itemKey;
+      if (drive.accessToken) {
+        selectedUrl += '?access_token=' + drive.accessToken;
       }
       selectedUrls.push(selectedUrl);
-      selectedItems.push(state.selectedItems[fsUrl][itemKey]);
+      selectedItems.push(state.selectedItems[driveUri][itemKey]);
     }
   }
 
@@ -510,8 +510,8 @@ async function validateUrl(url, settings) {
     }
   }
 
-  if (settings.filesystems[gemUrl] !== undefined) {
-    return { err: "Filesystem already exists" };
+  if (settings.drives[gemUrl] !== undefined) {
+    return { err: "Drive already exists" };
   }
 
   try {
@@ -524,7 +524,7 @@ async function validateUrl(url, settings) {
     }
   }
   catch(e) {
-    return { err: "Invalid filesystem. Is it a valid URL?" };
+    return { err: "Invalid drive. Is it a valid URL?" };
   }
 
   return {
@@ -532,10 +532,10 @@ async function validateUrl(url, settings) {
   };
 }
 
-async function authorize(fsUrl, path) {
+async function authorize(driveUri, path) {
   return window.gemdriveAuthClient.authorize({
   //return authz({
-    driveUri: fsUrl,
+    driveUri,
     perms: [
       {
         type: 'dir',
@@ -543,7 +543,7 @@ async function authorize(fsUrl, path) {
         path: path ? path : '/',
       }
     ],
-    state: fsUrl,
+    state: driveUri,
   });
 }
 

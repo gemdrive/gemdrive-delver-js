@@ -14,10 +14,10 @@ export const ControlBar = () => {
   locationEl.classList.add('gemdrive-delver-control-bar__location');
   dom.appendChild(locationEl);
 
-  const curFsEl = document.createElement('span');
-  curFsEl.classList.add('gemdrive-delver-control-bar__fs-url');
-  curFsEl.innerText = "[]";
-  locationEl.appendChild(curFsEl);
+  const curDriveEl = document.createElement('span');
+  curDriveEl.classList.add('gemdrive-delver-control-bar__drive-url');
+  curDriveEl.innerText = "[]";
+  locationEl.appendChild(curDriveEl);
 
   const curPathEl = document.createElement('span');
   curPathEl.classList.add('gemdrive-delver-control-bar__path');
@@ -122,8 +122,8 @@ export const ControlBar = () => {
   const openExtBtnContainerEl = document.createElement('span');
   btnContainerEl.appendChild(openExtBtnContainerEl);
 
-  function onLocationChange(fsUrl, path, accessToken) {
-    curFsEl.innerText = '[' + fsUrl + ']';
+  function onLocationChange(driveUri, path, accessToken) {
+    curDriveEl.innerText = '[' + driveUri + ']';
 
     const pathStr = encodePath(path);
     curPathEl.innerText = pathStr;
@@ -132,15 +132,15 @@ export const ControlBar = () => {
       openExtBtnContainerEl.removeChild(openExtBtnContainerEl.firstChild);
     }
 
-    if (fsUrl.length > 0) {
-      openExtBtnContainerEl.appendChild(OpenExternalButton(fsUrl, encodePath(path) + '/', accessToken));
+    if (driveUri.length > 0) {
+      openExtBtnContainerEl.appendChild(OpenExternalButton(driveUri, encodePath(path) + '/', accessToken));
     }
   }
 
   function onSelectedItemsChange(selectedItems) {
     let numItems = 0;
-    for (const fsUrl in selectedItems) {
-      numItems += Object.keys(selectedItems[fsUrl]).length;
+    for (const itemUrl in selectedItems) {
+      numItems += Object.keys(selectedItems[itemUrl]).length;
     }
 
     if (numItems === 0) {
