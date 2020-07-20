@@ -178,7 +178,7 @@ const GemDriveDelver = async (options) => {
       localStorage.setItem('settings', JSON.stringify(settings));
     }
 
-    const gemDataPath = ['gemdrive/meta', ...path, 'ls.tsv'];
+    const gemDataPath = [...path, '.gemdrive-ls.tsv'];
     let gemReqUrl = driveUri + encodePath(gemDataPath);
     if (drive.accessToken) {
       gemReqUrl += '?access_token=' + drive.accessToken;
@@ -515,7 +515,7 @@ async function validateUrl(url, settings) {
   }
 
   try {
-    const fetchUrl = gemUrl + '/gemdrive/meta/ls.tsv';
+    const fetchUrl = gemUrl + '/.gemdrive-ls.tsv';
     console.log(fetchUrl);
     const response = await fetch(fetchUrl);
 
