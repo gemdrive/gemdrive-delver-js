@@ -281,13 +281,6 @@ const OpenTabButton = (rootUrl, path) => {
   iconEl.name = 'open';
   dom.appendChild(iconEl);
 
-  const rootPath = new URL(rootUrl).pathname;
-
-  let authPathStr = encodePath(path);
-  if (rootPath !== '/') {
-    authPathStr = decodeURIComponent(rootPath + '/' + authPathStr.slice(1));
-  }
-
   return dom;
 };
 
@@ -328,7 +321,6 @@ const OpenExternalButton = (rootUrl, pathStr, token) => {
   return dom;
 };
 
-
 const DownloadButton = (rootUrl, path) => {
   const dom = document.createElement('a');
   dom.classList.add('gemdrive-delver-icon-button');
@@ -338,16 +330,45 @@ const DownloadButton = (rootUrl, path) => {
   iconEl.name = 'download';
   dom.appendChild(iconEl);
 
-  const rootPath = new URL(rootUrl).pathname;
-
-  let authPathStr = encodePath(path);
-  if (rootPath !== '/') {
-    authPathStr = rootPath + '/' + authPathStr.slice(1);
-  }
-
   return dom;
 };
 
+const CreateLinkButton = (driveUri, path, token) => {
+  const dom = document.createElement('span');
+  dom.classList.add('gemdrive-delver-icon-button');
+  const iconEl = document.createElement('ion-icon');
+  iconEl.name = 'link';
+  dom.appendChild(iconEl);
+
+  dom.addEventListener('click', async (e) => {
+    const pathStr = encodePath(path);
+
+    const delegatePath = driveUri + '/.gemdrive/auth/delegate';
+
+    const response = await fetch(delegatePath + `?access_token=${token}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        perms: [
+          {
+            perm: 'read',
+            path: pathStr,
+          },
+        ]
+      }),
+    });
+
+    if (response.status) {
+      const newToken = await response.text();
+      const delegatedLink = driveUri + pathStr + `?access_token=${newToken}`;
+      window.open(delegatedLink);
+    }
+    else {
+      alert("Error making link");
+    }
+  });
+
+  return dom;
+};
 
 const ItemDataView = (filename, item) => {
   const dom = document.createElement('div');
@@ -385,6 +406,7 @@ const IconRow = (rootUrl, path, token) => {
 
   dom.appendChild(DownloadButton(rootUrl, path));
   dom.appendChild(OpenTabButton(rootUrl, path));
+  dom.appendChild(CreateLinkButton(rootUrl, path, token));
 
   dom.addEventListener('click', (e) => {
     e.stopPropagation();
