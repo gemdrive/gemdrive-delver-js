@@ -208,7 +208,9 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
   });
 
   function onVisible() {
-    const thumbUrl = rootUrl + '/.gemdrive/images/256' + encodePath(path);
+    const pathStr = encodePath(path);
+    const ext = pathStr.slice(-4).toLowerCase();
+    const thumbUrl = rootUrl + pathStr + '.gemdrive-img-256' + ext;
 
     if (isImage(thumbUrl)) {
       const thumbContainerEl = document.createElement('span');
@@ -429,7 +431,9 @@ function getPreviewUrl(rootUrl, path, parentEl) {
     previewWidth = 2048;
   }
 
-  return rootUrl + `/.gemdrive/images/${previewWidth}${encodePath(path)}`;
+  const pathStr = encodePath(path);
+  const ext = pathStr.slice(-4).toLowerCase();
+  return rootUrl + `${pathStr}.gemdrive-img-${previewWidth}${ext}`;
 }
 
 function isImage(pathStr) {
