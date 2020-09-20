@@ -362,7 +362,8 @@ const CreateLinkButton = (driveUri, path, token) => {
     if (response.status) {
       const newToken = await response.text();
       const delegatedLink = driveUri + pathStr + `?access_token=${newToken}`;
-      window.open(delegatedLink);
+      alert(delegatedLink);
+      //window.open(delegatedLink);
     }
     else {
       alert("Error making link");
