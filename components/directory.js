@@ -396,9 +396,13 @@ const ItemDataView = (filename, item) => {
     let statLine = formatBytes(item.size);
 
     const firstPeriod = filename.indexOf('.');
-    if (firstPeriod) {
+    if (firstPeriod >= 0) {
       const ext = filename.slice(firstPeriod).toLowerCase();
       statLine = ext + ' | ' + statLine;
+    }
+
+    if (item.modTime.length > 0) {
+      statLine = statLine + ' | ' + item.modTime;
     }
 
     statsEl.innerText = statLine;
