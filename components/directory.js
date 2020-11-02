@@ -393,16 +393,21 @@ const ItemDataView = (filename, item) => {
     const statsEl = document.createElement('div');
     statsEl.classList.add('gemdrive-file-data__stats');
     dom.appendChild(statsEl);
-    let statLine = formatBytes(item.size);
+    let statLine = '| ';
+
 
     const firstPeriod = filename.indexOf('.');
     if (firstPeriod >= 0) {
       const ext = filename.slice(firstPeriod).toLowerCase();
-      statLine = ext + ' | ' + statLine;
+      statLine += ' ' + ext + ' |';
+    }
+
+    if (item.size >= 0) {
+      statLine += ' ' + formatBytes(item.size) + ' |';
     }
 
     if (item.modTime.length > 0) {
-      statLine = statLine + ' | ' + item.modTime;
+      statLine += ' ' + item.modTime + ' |';
     }
 
     statsEl.innerText = statLine;
