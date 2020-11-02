@@ -54,6 +54,8 @@ html {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  cursor: pointer;
+  user-select: none;
 }
 .gemdrive-delver__list-item:hover {
 }
@@ -86,6 +88,17 @@ html {
 .gemdrive-delver__list-item:visited {
   color: var(--color);
 }
+
+.gemdrive-delver-list-item__preview-url {
+  overflow-x: scroll;
+  display: block;
+  padding: 5px;
+  border: 1px solid #000;
+}
+.gemdrive-delver-list-item__preview-url:any-link {
+  color: var(--color);
+}
+
 
 .gemdrive-delver__list-content {
   height: 64px;

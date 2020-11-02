@@ -193,8 +193,15 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
       if (showPreview) {
 
         const iconRow = IconRow(rootUrl, path, token);
-
         previewEl.appendChild(iconRow.dom);
+
+        const urlTextEl = document.createElement('a');
+        urlTextEl.classList.add('gemdrive-delver-list-item__preview-url');
+        const url = rootUrl + encodePath(path);
+        urlTextEl.setAttribute('href', url);
+        urlTextEl.innerText = url;
+        previewEl.appendChild(urlTextEl);
+
 
         if (isImage(filename)) {
           previewEl.appendChild(ImagePreview(rootUrl, path, thumbnailPromise, token));
