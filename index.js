@@ -178,7 +178,7 @@ const GemDriveDelver = async (options) => {
       localStorage.setItem('settings', JSON.stringify(settings));
     }
 
-    const gemDataPath = [...path, '.gemdrive-ls.tsv'];
+    const gemDataPath = [...path, 'gemdrive', 'meta.json'];
     let gemReqUrl = driveUri + encodePath(gemDataPath);
     if (drive.accessToken) {
       gemReqUrl += '?access_token=' + drive.accessToken;
@@ -187,8 +187,7 @@ const GemDriveDelver = async (options) => {
     const gemDataResponse = await fetch(gemReqUrl);
 
     if (gemDataResponse.status === 200) {
-      const gemDataText = await gemDataResponse.text();
-      const gemData = parseGemDataTsv(gemDataText);
+      const gemData = await gemDataResponse.json();
 
       // derive directory state from global state
       const dirState = {
@@ -238,7 +237,7 @@ const GemDriveDelver = async (options) => {
   };
 
   // File uploads
-  const uppie = new Uppie();
+  //const uppie = new Uppie();
 
   const handleFiles = async (e, formData, filenames) => {
     for (const param of formData.entries()) {
@@ -296,11 +295,11 @@ const GemDriveDelver = async (options) => {
   };
 
   const fileInput = InvisibleFileInput();
-  uppie(fileInput, handleFiles);
+  //uppie(fileInput, handleFiles);
   dom.appendChild(fileInput);
   
   const folderInput = InvisibleFolderInput();
-  uppie(folderInput, handleFiles);
+  //uppie(folderInput, handleFiles);
   dom.appendChild(folderInput);
 
   controlBar.dom.addEventListener('upload', (e) => {
@@ -515,7 +514,7 @@ async function validateUrl(url, settings) {
   }
 
   try {
-    const fetchUrl = gemUrl + '/.gemdrive-ls.tsv';
+    const fetchUrl = gemUrl + '/gemdrive/meta.json';
     console.log(fetchUrl);
     const response = await fetch(fetchUrl);
 

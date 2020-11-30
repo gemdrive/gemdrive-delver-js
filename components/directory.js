@@ -45,7 +45,13 @@ const Directory = (state, dir, rootUrl, path, token) => {
 
     for (const filename of sortedNames) {
       const child = dir.children[filename];
-      const childPath = path.concat(filename);
+
+      // TODO: This is a bit of a hack to work around extra '/'s in the path.
+      // Might be a cleaner way.
+      const itemName = filename.endsWith('/') ? filename.slice(0, -1) : filename;
+
+      const childPath = path.concat(itemName);
+
       const listItem = ListItem(state.items[filename], filename, child, rootUrl, childPath, token)
       items[filename] = listItem;
       listItem.dom.dataset.filename = filename;
@@ -159,7 +165,9 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
 
   let thumbnailPromise;
 
-  if (item.type === 'dir') {
+  const isDir = filename.endsWith('/');
+
+  if (isDir) {
     const iconEl = document.createElement('ion-icon');
     iconEl.name = 'folder';
     iconContainerEl.appendChild(iconEl);
@@ -175,7 +183,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
 
   dom.addEventListener('click', (e) => {
 
-    if (item.type === 'dir') {
+    if (isDir) {
       e.preventDefault();
       dom.dispatchEvent(new CustomEvent('select-dir', {
         bubbles: true,
@@ -215,9 +223,10 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
   });
 
   function onVisible() {
-    const pathStr = encodePath(path);
-    const ext = pathStr.slice(-4).toLowerCase();
-    const thumbUrl = rootUrl + pathStr + '.gemdrive-img-256' + ext;
+    const dirPathStr = encodePath(path.slice(0, -1));
+    const thumbUrl = rootUrl + dirPathStr + '/gemdrive/images/256/' + filename;
+
+    console.log(thumbUrl);
 
     if (isImage(thumbUrl)) {
       const thumbContainerEl = document.createElement('span');
@@ -389,7 +398,9 @@ const ItemDataView = (filename, item) => {
   dom.appendChild(filenameEl);
   filenameEl.innerText = filename;
 
-  if (item.type === 'file') {
+  const isFile = !filename.endsWith('/');
+
+  if (isFile) {
     const statsEl = document.createElement('div');
     statsEl.classList.add('gemdrive-file-data__stats');
     dom.appendChild(statsEl);
@@ -448,9 +459,9 @@ function getPreviewUrl(rootUrl, path, parentEl) {
     previewWidth = 2048;
   }
 
-  const pathStr = encodePath(path);
-  const ext = pathStr.slice(-4).toLowerCase();
-  return rootUrl + `${pathStr}.gemdrive-img-${previewWidth}${ext}`;
+  const dirPathStr = encodePath(path.slice(0, -1));
+  const filename = path[path.length - 1];
+  return `${rootUrl}${dirPathStr}/gemdrive/images/${previewWidth}/${filename}`;
 }
 
 function isImage(pathStr) {
