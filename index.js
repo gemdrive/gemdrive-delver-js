@@ -3,7 +3,6 @@ import { ControlBar } from './components/control_bar.js';
 import { DriveList } from './components/drive_list.js';
 import { Directory } from './components/directory.js';
 import { Progress } from './components/progress.js';
-//import { authorize as authz } from '/lib/auth/index.js';
 
 
 const GemDriveDelver = async (options) => {
@@ -32,19 +31,7 @@ const GemDriveDelver = async (options) => {
     localStorage.setItem('settings', JSON.stringify(settings));
   }
 
-
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('code') && urlParams.has('state')) {
-
-    const { accessToken, state } = await window.gemdriveAuthClient.completeAuthorization();
-
-    const driveUri = state;
-    if (!settings.drives[driveUri]) {
-      settings.drives[driveUri] = {};
-    }
-    settings.drives[driveUri].accessToken = accessToken;
-    localStorage.setItem('settings', JSON.stringify(settings));
-  }
 
   if (urlParams.has('drive') && urlParams.has('path')) {
     navigate(urlParams.get('drive'), parsePath(urlParams.get('path')));
@@ -410,6 +397,36 @@ const GemDriveDelver = async (options) => {
     }
   });
 
+  async function authorize(driveUri, path) {
+
+    const email = prompt("Email to authorize:");
+
+    const authUrl = driveUri + path + 'gemdrive/authorize';
+
+    let res = await fetch(authUrl, {
+      method: 'POST',
+      body: JSON.stringify({
+        idType: 'email',
+        id: email,
+        perm: 'write',
+        path,
+      }),
+    });
+
+    const requestId = await res.text();
+
+    const code = prompt("Check email for code:");
+
+    res = await fetch(`${authUrl}?id=${requestId}&code=${code}`, {
+      method: 'POST',
+    });
+
+    const accessToken = await res.text();
+
+    settings.drives[driveUri].accessToken = accessToken;
+    localStorage.setItem('settings', JSON.stringify(settings));
+  }
+
   return dom;
 };
 
@@ -529,21 +546,6 @@ async function validateUrl(url, settings) {
   return {
     gemUrl
   };
-}
-
-async function authorize(driveUri, path) {
-  return window.gemdriveAuthClient.authorize({
-  //return authz({
-    driveUri,
-    perms: [
-      {
-        type: 'dir',
-        perm: 'read',
-        path: path ? path : '/',
-      }
-    ],
-    state: driveUri,
-  });
 }
 
 
