@@ -224,7 +224,7 @@ const GemDriveDelver = async (options) => {
   };
 
   // File uploads
-  //const uppie = new Uppie();
+  const uppie = new Uppie();
 
   const handleFiles = async (e, formData, filenames) => {
     for (const param of formData.entries()) {
@@ -233,29 +233,19 @@ const GemDriveDelver = async (options) => {
       const uploadPath = [...state.curPath, file.name];
       let uploadUrl = state.curDriveUri + encodePath(uploadPath);
 
-      let sseUrl = uploadUrl + '?events=true';
-
       const drive = settings.drives[state.curDriveUri];
       if (drive.accessToken) {
         uploadUrl += '?access_token=' + drive.accessToken;
-        sseUrl += '&access_token=' + drive.accessToken;
       }
 
-      const uploadProgress = Progress(file.size);
-      pageEl.insertBefore(uploadProgress.dom, pageEl.firstChild);
-
-      const sse = new EventSource(sseUrl); 
-      sse.addEventListener('update', (e) => {
-        const event = JSON.parse(e.data);
-        uploadProgress.updateCount(event.remfs.size);
-
-        if (event.type === 'complete') {
-          sse.close();
-        }
-      });
+      //const uploadProgress = Progress(file.size);
+      //pageEl.insertBefore(uploadProgress.dom, pageEl.firstChild);
 
       fetch(uploadUrl, {
         method: 'PUT',
+        header: {
+          'Content-Length': file.size,
+        },
         body: file,
       })
       .then(response => {
@@ -267,7 +257,7 @@ const GemDriveDelver = async (options) => {
           }
         }
         else {
-          return response.json()
+          //return response.json()
         }
       })
       .then(gemData => {
@@ -282,11 +272,11 @@ const GemDriveDelver = async (options) => {
   };
 
   const fileInput = InvisibleFileInput();
-  //uppie(fileInput, handleFiles);
+  uppie(fileInput, handleFiles);
   dom.appendChild(fileInput);
   
   const folderInput = InvisibleFolderInput();
-  //uppie(folderInput, handleFiles);
+  uppie(folderInput, handleFiles);
   dom.appendChild(folderInput);
 
   controlBar.dom.addEventListener('upload', (e) => {
