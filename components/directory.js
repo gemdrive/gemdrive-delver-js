@@ -224,7 +224,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
 
   function onVisible() {
     const dirPathStr = encodePath(path.slice(0, -1));
-    const thumbUrl = rootUrl + dirPathStr + '/gemdrive/images/256/' + filename;
+    const thumbUrl = rootUrl + dirPathStr + 'gemdrive/images/256/' + filename;
 
     console.log(thumbUrl);
 
@@ -461,7 +461,7 @@ function getPreviewUrl(rootUrl, path, parentEl) {
 
   const dirPathStr = encodePath(path.slice(0, -1));
   const filename = path[path.length - 1];
-  return `${rootUrl}${dirPathStr}/gemdrive/images/${previewWidth}/${filename}`;
+  return `${rootUrl}${dirPathStr}gemdrive/images/${previewWidth}/${filename}`;
 }
 
 function isImage(pathStr) {
