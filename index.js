@@ -10,6 +10,7 @@ const GemDriveDelver = async (options) => {
   const state = {
     curDriveUri: null,
     curPath: null,
+    curDir: null,
     selectedItems: {},
   };
 
@@ -99,6 +100,7 @@ const GemDriveDelver = async (options) => {
     controlBar.onLocationChange('', []);
     state.curDriveUri = null;
     state.curPath = null;
+    state.curDir = null;
     history.pushState(null, '', window.location.pathname);
   }
 
@@ -200,8 +202,8 @@ const GemDriveDelver = async (options) => {
         }
       }
 
-      const curDir = gemData;
-      const dir = Directory(dirState, curDir, driveUri, path, drive.accessToken);
+      state.curDir = gemData;
+      const dir = Directory(dirState, state.curDir, driveUri, path, drive.accessToken);
       removeAllChildren(pageEl);
       pageEl.appendChild(dir.dom);
       controlBar.onLocationChange(driveUri, path, drive.accessToken);
@@ -247,43 +249,65 @@ const GemDriveDelver = async (options) => {
       const uploadProgress = Progress(file.size);
       pageEl.insertBefore(uploadProgress.dom, pageEl.firstChild);
 
-      const chunkSize = 10*1024*1024;
-      let offset = 0;
-
-      while (offset < file.size) {
-        const chunk = file.slice(offset, offset + chunkSize);
-        await uploadChunk(chunk, offset);
-        offset += chunkSize;
-        uploadProgress.updateCount(offset);
-      }
-
-      navigate(state.curDriveUri, state.curPath);
-
-      async function uploadChunk(chunk, offset) {
-
-        await fetch(uploadUrl + '&offset=' + offset, {
-          method: 'PATCH',
-          header: {
-            'Content-Length': chunk.size,
-          },
-          body: chunk,
-        })
-        .then(response => {
-          if (response.status === 403) {
-            const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
-
-            if (doAuth) {
-              authorize(state.curDriveUri);
-            }
-          }
-        })
-        .catch(e => {
-          console.error(e);
+      const intervalId = setInterval(async () => {
+        const res = await fetch(uploadUrl, {
+          method: 'HEAD',
         });
 
-      }
+        const size = Number(res.headers.get('content-length'));
+        uploadProgress.updateCount(size);
+      }, 3000);
+
+      await uploadFile(uploadUrl, file);
+
+      clearInterval(intervalId);
+
+      navigate(state.curDriveUri, state.curPath);
     }
   };
+
+  async function uploadFile(uploadUrl, file) {
+
+    const existing = state.curDir.children[file.name];
+
+    if (existing !== undefined) {
+
+      if (existing.size === file.size) {
+        const doIt = confirm("File exists and is same size. Overwrite?");
+        if (doIt) {
+
+          const urlObj = new URL(uploadUrl);
+          urlObj.searchParams.set('overwrite', 'true');
+          
+          // TODO: need to properly encode params so they don't become part of path
+          await fetch(urlObj.href, {
+            method: 'PUT',
+            body: file,
+          });
+        }
+      }
+      else if (existing.size < file.size) {
+        const doIt = confirm("File exists but is smaller. Resume?");
+
+        if (doIt) {
+
+          const urlObj = new URL(uploadUrl);
+          urlObj.searchParams.set('offset', existing.size);
+
+          await fetch(urlObj.href, {
+            method: 'PATCH',
+            body: file.slice(existing.size),
+          });
+        }
+      }
+    }
+    else {
+      await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+      });
+    }
+  }
 
   const fileInput = InvisibleFileInput();
   uppie(fileInput, handleFiles);
