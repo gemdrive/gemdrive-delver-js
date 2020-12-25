@@ -17,6 +17,9 @@ export const Progress = (total) => {
   text.innerText = formatBytes(0) + ' / ' + formatBytes(total);
 
   function updateCount(count) {
+    if (count > total) {
+      count = total;
+    }
     text.innerText = formatBytes(count) + ' / ' + formatBytes(total);
     const percent = Math.round((count / total) * 100);
     bar.style.width = percent + '%';

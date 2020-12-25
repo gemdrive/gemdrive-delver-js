@@ -52,6 +52,12 @@ const GemDriveDelver = async (options) => {
 
         if (doAuth) {
           authorize(result.gemUrl);
+
+          const drive = {};
+          settings.drives[result.gemUrl] = drive;
+          localStorage.setItem('settings', JSON.stringify(settings));
+
+          driveList.addDrive(result.gemUrl, drive);
         }
       }
       else {
@@ -238,36 +244,44 @@ const GemDriveDelver = async (options) => {
         uploadUrl += '?access_token=' + drive.accessToken;
       }
 
-      //const uploadProgress = Progress(file.size);
-      //pageEl.insertBefore(uploadProgress.dom, pageEl.firstChild);
+      const uploadProgress = Progress(file.size);
+      pageEl.insertBefore(uploadProgress.dom, pageEl.firstChild);
 
-      fetch(uploadUrl, {
-        method: 'PUT',
-        header: {
-          'Content-Length': file.size,
-        },
-        body: file,
-      })
-      .then(response => {
-        if (response.status === 403) {
-          const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
+      const chunkSize = 10*1024*1024;
+      let offset = 0;
 
-          if (doAuth) {
-            authorize(state.curDriveUri);
+      while (offset < file.size) {
+        const chunk = file.slice(offset, offset + chunkSize);
+        await uploadChunk(chunk, offset);
+        offset += chunkSize;
+        uploadProgress.updateCount(offset);
+      }
+
+      navigate(state.curDriveUri, state.curPath);
+
+      async function uploadChunk(chunk, offset) {
+
+        await fetch(uploadUrl + '&offset=' + offset, {
+          method: 'PATCH',
+          header: {
+            'Content-Length': chunk.size,
+          },
+          body: chunk,
+        })
+        .then(response => {
+          if (response.status === 403) {
+            const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
+
+            if (doAuth) {
+              authorize(state.curDriveUri);
+            }
           }
-        }
-        else {
-          //return response.json()
-        }
-      })
-      .then(gemData => {
-        // TODO: This is a hack. Will probably need to dynamically update
-        // at some point.
-        navigate(state.curDriveUri, state.curPath);
-      })
-      .catch(e => {
-        console.error(e);
-      });
+        })
+        .catch(e => {
+          console.error(e);
+        });
+
+      }
     }
   };
 
@@ -390,6 +404,10 @@ const GemDriveDelver = async (options) => {
   async function authorize(driveUri, path) {
 
     const email = prompt("Email to authorize:");
+
+    if (path === undefined) {
+      path = '/';
+    }
 
     const authUrl = driveUri + path + 'gemdrive/authorize';
 
@@ -522,7 +540,6 @@ async function validateUrl(url, settings) {
 
   try {
     const fetchUrl = gemUrl + '/gemdrive/meta.json';
-    console.log(fetchUrl);
     const response = await fetch(fetchUrl);
 
     if (response.status !== 200) {

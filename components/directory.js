@@ -226,8 +226,6 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
     const dirPathStr = encodePath(path.slice(0, -1));
     const thumbUrl = rootUrl + dirPathStr + 'gemdrive/images/256/' + filename;
 
-    console.log(thumbUrl);
-
     if (isImage(thumbUrl)) {
       const thumbContainerEl = document.createElement('span');
       thumbContainerEl.classList.add('gemdrive-delver__thumb-container');
