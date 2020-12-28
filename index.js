@@ -3,7 +3,7 @@ import { ControlBar } from './components/control_bar.js';
 import { DriveList } from './components/drive_list.js';
 import { Directory } from './components/directory.js';
 import { Progress } from './components/progress.js';
-import { showConfirmDialog } from './components/dialog.js';
+import { showConfirmDialog, showPromptDialog } from './components/dialog.js';
 
 
 const GemDriveDelver = async (options) => {
@@ -109,8 +109,8 @@ const GemDriveDelver = async (options) => {
     navigate(state.curDriveUri, state.curPath);
   });
   
-  controlBar.dom.addEventListener('create-directory', (e) => {
-    const dirName = prompt("Enter directory name");
+  controlBar.dom.addEventListener('create-directory', async (e) => {
+    const dirName = await showPromptDialog("Enter directory name");
 
     if (dirName) {
 
@@ -428,7 +428,7 @@ const GemDriveDelver = async (options) => {
 
   async function authorize(driveUri, path) {
 
-    const email = prompt("Email to authorize:");
+    const email = await showPromptDialog("Email to authorize:");
 
     if (path === undefined) {
       path = '/';
@@ -448,7 +448,7 @@ const GemDriveDelver = async (options) => {
 
     const requestId = await res.text();
 
-    const code = prompt("Check email for code:");
+    const code = await showPromptDialog("Check email for code:");
 
     res = await fetch(`${authUrl}?id=${requestId}&code=${code}`, {
       method: 'POST',
