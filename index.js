@@ -3,6 +3,7 @@ import { ControlBar } from './components/control_bar.js';
 import { DriveList } from './components/drive_list.js';
 import { Directory } from './components/directory.js';
 import { Progress } from './components/progress.js';
+import { showConfirmDialog } from './components/dialog.js';
 
 
 const GemDriveDelver = async (options) => {
@@ -49,7 +50,7 @@ const GemDriveDelver = async (options) => {
 
     if (result.err) {
       if (result.err === 403) {
-        const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
+        const doAuth = await showConfirmDialog("Unauthorized. Do you want to attempt authorization?");
 
         if (doAuth) {
           authorize(result.gemUrl);
@@ -124,12 +125,12 @@ const GemDriveDelver = async (options) => {
       fetch(createDirReqUrl, {
         method: 'PUT',
       })
-      .then((response) => {
+      .then(async (response) => {
         if (response.status === 200) {
           navigate(state.curDriveUri, state.curPath);
         }
         else if (response.status === 403) {
-          const doAuth = confirm("Unauthorized to create. Do you want to attempt authorization?");
+          const doAuth = await showConfirmDialog("Unauthorized to create. Do you want to attempt authorization?");
 
           if (doAuth) {
             authorize(state.curDriveUri);
@@ -209,7 +210,7 @@ const GemDriveDelver = async (options) => {
       controlBar.onLocationChange(driveUri, path, drive.accessToken);
     }
     else if (gemDataResponse.status === 403) {
-      const doAuth = confirm("Unauthorized. Do you want to attempt authorization?");
+      const doAuth = await showConfirmDialog("Unauthorized. Do you want to attempt authorization?");
 
       if (doAuth) {
         authorize(driveUri, encodePath(path));
@@ -273,7 +274,7 @@ const GemDriveDelver = async (options) => {
     if (existing !== undefined) {
 
       if (existing.size === file.size) {
-        const doIt = confirm("File exists and is same size. Overwrite?");
+        const doIt = await showConfirmDialog("File exists and is same size. Overwrite?");
         if (doIt) {
 
           const urlObj = new URL(uploadUrl);
@@ -287,7 +288,7 @@ const GemDriveDelver = async (options) => {
         }
       }
       else if (existing.size < file.size) {
-        const doIt = confirm("File exists but is smaller. Resume?");
+        const doIt = await showConfirmDialog("File exists but is smaller. Resume?");
 
         if (doIt) {
 
@@ -342,7 +343,7 @@ const GemDriveDelver = async (options) => {
 
     const { numItems, selectedUrls, selectedItems } = buildSelectedUrls(state, settings);
 
-    const doIt = confirm(`Are you sure you want to copy ${numItems} items?`);
+    const doIt = await showConfirmDialog(`Are you sure you want to copy ${numItems} items?`);
     
     if (doIt) {
 
@@ -390,25 +391,25 @@ const GemDriveDelver = async (options) => {
     authorize(state.curDriveUri);
   });
 
-  controlBar.dom.addEventListener('delete', (e) => {
+  controlBar.dom.addEventListener('delete', async (e) => {
     
     const { numItems, selectedUrls } = buildSelectedUrls(state, settings);
 
-    const doIt = confirm(`Are you sure you want to delete ${numItems} items?`);
+    const doIt = await showConfirmDialog(`Are you sure you want to delete ${numItems} items?`);
     
     if (doIt) {
       for (const url of selectedUrls) {
         fetch(url, {
           method: 'DELETE',
         })
-        .then((response) => {
+        .then(async (response) => {
           if (response.status === 200) {
             state.selectedItems = {};
             controlBar.onSelectedItemsChange(state.selectedItems);
             navigate(state.curDriveUri, state.curPath);
           }
           else if (response.status === 403) {
-            const doAuth = confirm("Unauthorized to delete. Do you want to attempt authorization?");
+            const doAuth = await showConfirmDialog("Unauthorized to delete. Do you want to attempt authorization?");
 
             if (doAuth) {
               authorize(state.curDriveUri);
