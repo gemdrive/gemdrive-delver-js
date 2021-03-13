@@ -269,9 +269,9 @@ const GemDriveDelver = async (options) => {
 
   async function uploadFile(uploadUrl, file) {
 
-    const existing = state.curDir.children[file.name];
+    const existing = state.curDir.children && state.curDir.children[file.name];
 
-    if (existing !== undefined) {
+    if (existing) {
 
       if (existing.size === file.size) {
         const doIt = await showConfirmDialog("File exists and is same size. Overwrite?");
