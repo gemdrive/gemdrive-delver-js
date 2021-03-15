@@ -439,10 +439,12 @@ const GemDriveDelver = async (options) => {
     let res = await fetch(authUrl, {
       method: 'POST',
       body: JSON.stringify({
-        idType: 'email',
-        id: email,
-        perm: 'write',
-        path,
+        type: 'email-code',
+        email,
+        key: {
+          perm: 'write',
+          path,
+        },
       }),
     });
 
