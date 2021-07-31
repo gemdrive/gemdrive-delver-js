@@ -210,11 +210,14 @@ const GemDriveDelver = async (options) => {
       controlBar.onLocationChange(driveUri, path, drive.accessToken);
     }
     else if (gemDataResponse.status === 403) {
-      const doAuth = await showConfirmDialog("Unauthorized. Do you want to attempt authorization?");
 
-      if (doAuth) {
-        authorize(driveUri, encodePath(path));
-      }
+      loginPrompt(driveUri, encodePath(path));
+
+      //const doAuth = await showConfirmDialog("Unauthorized. Do you want to attempt authorization?");
+
+      //if (doAuth) {
+      //  authorize(driveUri, encodePath(path));
+      //}
     }
   }
 
@@ -425,6 +428,24 @@ const GemDriveDelver = async (options) => {
       }
     }
   });
+
+  async function loginPrompt(driveUri, path) {
+    const key = await showPromptDialog(`You do not have access to\n${driveUri + path}\nEnter a key to login:`);
+
+    const loginUrl = driveUri + path + `gemdrive/login?access_token=${key}`;
+
+    let res = await fetch(loginUrl, {
+      method: 'POST',
+      //credentials: 'include',
+    });
+
+    if (res.status === 200) {
+      const newKey = await res.text();
+
+      settings.drives[driveUri].accessToken = newKey;
+      localStorage.setItem('settings', JSON.stringify(settings));
+    }
+  }
 
   async function authorize(driveUri, path) {
 
