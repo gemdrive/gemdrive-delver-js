@@ -353,31 +353,31 @@ const CreateLinkButton = (driveUri, path, token) => {
   const dom = document.createElement('span');
   dom.classList.add('gemdrive-delver-icon-button');
   const iconEl = document.createElement('ion-icon');
-  iconEl.name = 'link';
+  //iconEl.name = 'link';
+  iconEl.name = 'open';
   dom.appendChild(iconEl);
 
   dom.addEventListener('click', async (e) => {
     const pathStr = encodePath(path);
 
-    const delegatePath = driveUri + '/.gemdrive/auth/delegate';
+    const delegatePath = driveUri + '/gemdrive/create-key';
+
+    const key = {
+      privileges: {
+        [pathStr]: 'read',
+      },
+    }
 
     const response = await fetch(delegatePath + `?access_token=${token}`, {
       method: 'POST',
-      body: JSON.stringify({
-        perms: [
-          {
-            perm: 'read',
-            path: pathStr,
-          },
-        ]
-      }),
+      body: JSON.stringify(key),
     });
 
     if (response.status) {
       const newToken = await response.text();
       const delegatedLink = driveUri + pathStr + `?access_token=${newToken}`;
-      alert(delegatedLink);
-      //window.open(delegatedLink);
+      //alert(delegatedLink);
+      window.open(delegatedLink);
     }
     else {
       alert("Error making link");
@@ -433,7 +433,7 @@ const IconRow = (rootUrl, path, token) => {
   dom.classList.add('gemdrive-icon-row');
 
   dom.appendChild(DownloadButton(rootUrl, path));
-  dom.appendChild(OpenTabButton(rootUrl, path));
+  //dom.appendChild(OpenTabButton(rootUrl, path));
   dom.appendChild(CreateLinkButton(rootUrl, path, token));
 
   dom.addEventListener('click', (e) => {
