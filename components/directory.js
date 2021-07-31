@@ -288,17 +288,18 @@ const ImagePreview = (rootUrl, path, thumbnailPromise, token) => {
   return dom;
 };
 
-const OpenTabButton = (rootUrl, path) => {
-  const dom = document.createElement('a');
-  dom.classList.add('gemdrive-delver-icon-button');
-  dom.href = rootUrl + encodePath(path);
-  dom.setAttribute('target', '_blank');
-  const iconEl = document.createElement('ion-icon');
-  iconEl.name = 'open';
-  dom.appendChild(iconEl);
-
-  return dom;
-};
+// TODO: Previous version of OpenTabButton
+//const OpenTabButton = (rootUrl, path) => {
+//  const dom = document.createElement('a');
+//  dom.classList.add('gemdrive-delver-icon-button');
+//  dom.href = rootUrl + encodePath(path);
+//  dom.setAttribute('target', '_blank');
+//  const iconEl = document.createElement('ion-icon');
+//  iconEl.name = 'open';
+//  dom.appendChild(iconEl);
+//
+//  return dom;
+//};
 
 const OpenExternalButton = (rootUrl, pathStr, token) => {
   const dom = document.createElement('ion-icon');
@@ -337,19 +338,35 @@ const OpenExternalButton = (rootUrl, pathStr, token) => {
   return dom;
 };
 
-const DownloadButton = (rootUrl, path) => {
-  const dom = document.createElement('a');
+const DownloadButton = (driveUri, path, token) => {
+  const dom = document.createElement('span');
   dom.classList.add('gemdrive-delver-icon-button');
-  dom.href = rootUrl + encodePath(path) + '?download=true';
-  dom.setAttribute('target', '_blank');
   const iconEl = document.createElement('ion-icon');
   iconEl.name = 'download';
   dom.appendChild(iconEl);
 
+  dom.addEventListener('click', async (e) => {
+    const pathStr = encodePath(path);
+    const authenticatedLink = await getAuthenticatedLink(driveUri, pathStr, token);
+    window.open(authenticatedLink + '&download=true');
+  });
+
   return dom;
 };
 
-const CreateLinkButton = (driveUri, path, token) => {
+//const DownloadButton = (rootUrl, path) => {
+//  const dom = document.createElement('a');
+//  dom.classList.add('gemdrive-delver-icon-button');
+//  dom.href = rootUrl + encodePath(path) + '?download=true';
+//  dom.setAttribute('target', '_blank');
+//  const iconEl = document.createElement('ion-icon');
+//  iconEl.name = 'download';
+//  dom.appendChild(iconEl);
+//
+//  return dom;
+//};
+
+const OpenTabButton = (driveUri, path, token) => {
   const dom = document.createElement('span');
   dom.classList.add('gemdrive-delver-icon-button');
   const iconEl = document.createElement('ion-icon');
@@ -359,33 +376,39 @@ const CreateLinkButton = (driveUri, path, token) => {
 
   dom.addEventListener('click', async (e) => {
     const pathStr = encodePath(path);
-
-    const delegatePath = driveUri + '/gemdrive/create-key';
-
-    const key = {
-      privileges: {
-        [pathStr]: 'read',
-      },
-    }
-
-    const response = await fetch(delegatePath + `?access_token=${token}`, {
-      method: 'POST',
-      body: JSON.stringify(key),
-    });
-
-    if (response.status) {
-      const newToken = await response.text();
-      const delegatedLink = driveUri + pathStr + `?access_token=${newToken}`;
-      //alert(delegatedLink);
-      window.open(delegatedLink);
-    }
-    else {
-      alert("Error making link");
-    }
+    const authenticatedLink = await getAuthenticatedLink(driveUri, pathStr, token);
+    window.open(authenticatedLink);
   });
 
   return dom;
 };
+
+async function getAuthenticatedLink(driveUri, pathStr, token) {
+  const delegatePath = driveUri + '/gemdrive/create-key';
+
+  const key = {
+    privileges: {
+      [pathStr]: 'read',
+    },
+  }
+
+  const response = await fetch(delegatePath + `?access_token=${token}`, {
+    method: 'POST',
+    body: JSON.stringify(key),
+  });
+
+  let link;
+
+  if (response.status) {
+    const newToken = await response.text();
+    link = driveUri + pathStr + `?access_token=${newToken}`;
+  }
+  else {
+    alert("Error making link");
+  }
+
+  return link;
+}
 
 const ItemDataView = (filename, item) => {
   const dom = document.createElement('div');
@@ -432,9 +455,10 @@ const IconRow = (rootUrl, path, token) => {
   const dom = document.createElement('div');
   dom.classList.add('gemdrive-icon-row');
 
-  dom.appendChild(DownloadButton(rootUrl, path));
+  dom.appendChild(DownloadButton(rootUrl, path, token));
   //dom.appendChild(OpenTabButton(rootUrl, path));
-  dom.appendChild(CreateLinkButton(rootUrl, path, token));
+  dom.appendChild(OpenTabButton(rootUrl, path, token));
+  //dom.appendChild(CreateLinkButton(rootUrl, path, token));
 
   dom.addEventListener('click', (e) => {
     e.stopPropagation();
