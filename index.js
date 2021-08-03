@@ -50,17 +50,12 @@ const GemDriveDelver = async (options) => {
 
     if (result.err) {
       if (result.err === 403) {
-        const doAuth = await showConfirmDialog("Unauthorized. Do you want to attempt authorization?");
+        loginPrompt(result.gemUrl, '/');
 
-        if (doAuth) {
-          authorize(result.gemUrl);
-
-          const drive = {};
-          settings.drives[result.gemUrl] = drive;
-          localStorage.setItem('settings', JSON.stringify(settings));
-
-          driveList.addDrive(result.gemUrl, drive);
-        }
+        const drive = {};
+        settings.drives[result.gemUrl] = drive;
+        localStorage.setItem('settings', JSON.stringify(settings));
+        driveList.addDrive(result.gemUrl, drive);
       }
       else {
         alert(result.err);
@@ -130,11 +125,7 @@ const GemDriveDelver = async (options) => {
           navigate(state.curDriveUri, state.curPath);
         }
         else if (response.status === 403) {
-          const doAuth = await showConfirmDialog("Unauthorized to create. Do you want to attempt authorization?");
-
-          if (doAuth) {
-            authorize(state.curDriveUri);
-          }
+          loginPrompt(state.curDriveUri, '/');
         }
         else {
           alert("Creating directory failed for unknown reason.");
@@ -210,14 +201,7 @@ const GemDriveDelver = async (options) => {
       controlBar.onLocationChange(driveUri, path, drive.accessToken);
     }
     else if (gemDataResponse.status === 403) {
-
       loginPrompt(driveUri, encodePath(path));
-
-      //const doAuth = await showConfirmDialog("Unauthorized. Do you want to attempt authorization?");
-
-      //if (doAuth) {
-      //  authorize(driveUri, encodePath(path));
-      //}
     }
   }
 
@@ -391,7 +375,7 @@ const GemDriveDelver = async (options) => {
   });
 
   controlBar.dom.addEventListener('authorize', (e) => {
-    authorize(state.curDriveUri);
+    loginPrompt(state.curDriveUri, '/');
   });
 
   controlBar.dom.addEventListener('delete', async (e) => {
@@ -412,11 +396,7 @@ const GemDriveDelver = async (options) => {
             navigate(state.curDriveUri, state.curPath);
           }
           else if (response.status === 403) {
-            const doAuth = await showConfirmDialog("Unauthorized to delete. Do you want to attempt authorization?");
-
-            if (doAuth) {
-              authorize(state.curDriveUri);
-            }
+            loginPrompt(state.curDriveUri, '/');
           }
           else {
             alert("Failed delete for unknown reason.");
@@ -445,42 +425,6 @@ const GemDriveDelver = async (options) => {
       settings.drives[driveUri].accessToken = newKey;
       localStorage.setItem('settings', JSON.stringify(settings));
     }
-  }
-
-  async function authorize(driveUri, path) {
-
-    const email = await showPromptDialog("Email to authorize:");
-
-    if (path === undefined) {
-      path = '/';
-    }
-
-    const authUrl = driveUri + path + 'gemdrive/authorize';
-
-    let res = await fetch(authUrl, {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'email-code',
-        email,
-        key: {
-          perm: 'write',
-          path,
-        },
-      }),
-    });
-
-    const requestId = await res.text();
-
-    const code = await showPromptDialog("Check email for code:");
-
-    res = await fetch(`${authUrl}?id=${requestId}&code=${code}`, {
-      method: 'POST',
-    });
-
-    const accessToken = await res.text();
-
-    settings.drives[driveUri].accessToken = accessToken;
-    localStorage.setItem('settings', JSON.stringify(settings));
   }
 
   return dom;
