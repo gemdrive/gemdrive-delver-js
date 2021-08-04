@@ -165,7 +165,7 @@ const GemDriveDelver = async (options) => {
       localStorage.setItem('settings', JSON.stringify(settings));
     }
 
-    const gemDataPath = ['gemdrive', ...path, 'meta.json'];
+    const gemDataPath = ['gemdrive', 'index', ...path, 'list.json'];
     let gemReqUrl = driveUri + encodePath(gemDataPath);
     if (drive.accessToken) {
       gemReqUrl += '?access_token=' + drive.accessToken;
@@ -531,7 +531,7 @@ async function validateUrl(url, settings) {
   }
 
   try {
-    const fetchUrl = gemUrl + '/gemdrive/meta.json';
+    const fetchUrl = gemUrl + '/gemdrive/index/list.json';
     const response = await fetch(fetchUrl);
 
     if (response.status !== 200) {
