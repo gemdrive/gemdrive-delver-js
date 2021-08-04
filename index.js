@@ -165,7 +165,7 @@ const GemDriveDelver = async (options) => {
       localStorage.setItem('settings', JSON.stringify(settings));
     }
 
-    const gemDataPath = [...path, 'gemdrive', 'meta.json'];
+    const gemDataPath = ['gemdrive', ...path, 'meta.json'];
     let gemReqUrl = driveUri + encodePath(gemDataPath);
     if (drive.accessToken) {
       gemReqUrl += '?access_token=' + drive.accessToken;
