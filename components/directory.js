@@ -290,42 +290,7 @@ const ImagePreview = (rootUrl, path, thumbnailPromise, token) => {
 //  return dom;
 //};
 
-const OpenExternalButton = (rootUrl, pathStr, token) => {
-  const dom = document.createElement('ion-icon');
-  dom.classList.add('gemdrive-delver-icon-button');
-  dom.name = 'open';
 
-  const rootPath = new URL(rootUrl).pathname;
-
-  let authPathStr = pathStr;
-  if (rootPath !== '/') {
-    authPathStr = decodeURIComponent(rootPath + '/' + authPathStr.slice(1));
-  }
-
-  dom.addEventListener('click', (e) => {
-
-    e.preventDefault();
-  
-    const childWindow = window.open('https://gemdrive.io/apps/launcher/');
-
-    window.addEventListener('message', (message) => {
-      if (message.data === 'child-ready') {
-        childWindow.postMessage({
-          command: 'run',
-          items: [
-            {
-              driveUri: rootUrl,
-              path: pathStr,
-              accessToken: token,
-            }
-          ],
-        });
-      }
-    });
-  });
-
-  return dom;
-};
 
 const DownloadButton = (driveUri, path, token) => {
   const dom = document.createElement('span');
@@ -485,5 +450,4 @@ function isImage(pathStr) {
 
 export {
   Directory,
-  OpenExternalButton,
 };

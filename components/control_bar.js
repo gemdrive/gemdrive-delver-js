@@ -1,6 +1,4 @@
 import { encodePath, removeAllChildren } from '../utils.js';
-import { OpenExternalButton } from './directory.js';
-
 
 export const ControlBar = () => {
   const dom = document.createElement('div');
@@ -25,30 +23,24 @@ export const ControlBar = () => {
   locationEl.appendChild(curPathEl);
 
 
-  const backBtnEl = document.createElement('ion-icon');
-  backBtnEl.classList.add('gemdrive-delver-icon-button');
+  const backBtnEl = Button('Back');
   btnContainerEl.appendChild(backBtnEl);
-  backBtnEl.name = 'arrow-back-outline';
   backBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('navigate-back', {
       bubbles: true,
     }));
   });
 
-  const upBtnEl = document.createElement('ion-icon');
-  upBtnEl.classList.add('gemdrive-delver-icon-button');
+  const upBtnEl = Button('Up');
   btnContainerEl.appendChild(upBtnEl);
-  upBtnEl.name = 'arrow-up-outline';
   upBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('navigate-up', {
       bubbles: true,
     }));
   });
 
-  const homeBtnEl = document.createElement('ion-icon');
-  homeBtnEl.classList.add('gemdrive-delver-icon-button');
+  const homeBtnEl = Button('Home');
   btnContainerEl.appendChild(homeBtnEl);
-  homeBtnEl.name = 'home';
   homeBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('go-to-your-home', {
       bubbles: true,
@@ -75,9 +67,7 @@ export const ControlBar = () => {
   //  }));
   //});
 
-  const uploadBtnEl = document.createElement('ion-icon');
-  uploadBtnEl.classList.add('gemdrive-delver-icon-button');
-  uploadBtnEl.name = 'cloud-upload';
+  const uploadBtnEl = Button('Upload');
   uploadBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('upload', {
       bubbles: true,
@@ -85,9 +75,7 @@ export const ControlBar = () => {
   });
   btnContainerEl.appendChild(uploadBtnEl);
 
-  const newDirBtnEl = document.createElement('ion-icon');
-  newDirBtnEl.classList.add('gemdrive-delver-icon-button');
-  newDirBtnEl.name = 'add-circle';
+  const newDirBtnEl = Button('New Directory');
   newDirBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('create-directory', {
       bubbles: true,
@@ -98,9 +86,7 @@ export const ControlBar = () => {
   const copyBtnContainerEl = document.createElement('span');
   btnContainerEl.appendChild(copyBtnContainerEl);
 
-  const copyBtnEl = document.createElement('ion-icon');
-  copyBtnEl.classList.add('gemdrive-delver-icon-button');
-  copyBtnEl.name = 'copy';
+  const copyBtnEl = Button('Copy Here');
   copyBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('copy', {
       bubbles: true,
@@ -110,9 +96,7 @@ export const ControlBar = () => {
   const deleteBtnContainerEl = document.createElement('span');
   btnContainerEl.appendChild(deleteBtnContainerEl);
 
-  const deleteBtnEl = document.createElement('ion-icon');
-  deleteBtnEl.classList.add('gemdrive-delver-icon-button');
-  deleteBtnEl.name = 'close-circle';
+  const deleteBtnEl = Button('Delete');
   deleteBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('delete', {
       bubbles: true,
@@ -172,4 +156,48 @@ export const ControlBar = () => {
   //dom.appendChild(gridIconEl);
 
   return { dom, onLocationChange, onSelectedItemsChange };
+};
+
+const OpenExternalButton = (rootUrl, pathStr, token) => {
+  const dom = Button('Launch App');
+
+  const rootPath = new URL(rootUrl).pathname;
+
+  let authPathStr = pathStr;
+  if (rootPath !== '/') {
+    authPathStr = decodeURIComponent(rootPath + '/' + authPathStr.slice(1));
+  }
+
+  dom.addEventListener('click', (e) => {
+
+    e.preventDefault();
+  
+    const childWindow = window.open('https://gemdrive.io/apps/launcher/');
+
+    window.addEventListener('message', (message) => {
+      if (message.data === 'child-ready') {
+        childWindow.postMessage({
+          command: 'run',
+          items: [
+            {
+              driveUri: rootUrl,
+              path: pathStr,
+              accessToken: token,
+            }
+          ],
+        });
+      }
+    });
+  });
+
+  return dom;
+};
+
+
+const Button = (text) => {
+  const dom = document.createElement('button');
+  //dom.classList.add('gemdrive-delver-button');
+  dom.classList.add('button');
+  dom.innerText = text;
+  return dom;
 };
