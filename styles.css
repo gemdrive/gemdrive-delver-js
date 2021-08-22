@@ -64,11 +64,6 @@ html {
 .gemdrive-delver__list-item:hover {
 }
 
-.gemdrive-delver-list-item__icon-container {
-  font-size: 28px;
-  margin: 5px;
-}
-
 .gemdrive-delver__thumb-container {
   width: 64px;
   height: 64px;

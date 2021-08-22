@@ -159,24 +159,13 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
   //}
 
 
-  const iconContainerEl = document.createElement('span');
-  iconContainerEl.classList.add('gemdrive-delver-list-item__icon-container');
-  inner.appendChild(iconContainerEl);
+  const thumbPlaceholderEl = document.createElement('span');
+  thumbPlaceholderEl.classList.add('gemdrive-delver-list-item__thumb-placeholder');
+  inner.appendChild(thumbPlaceholderEl);
 
   let thumbnailPromise;
 
   const isDir = filename.endsWith('/');
-
-  if (isDir) {
-    const iconEl = document.createElement('ion-icon');
-    iconEl.name = 'folder';
-    iconContainerEl.appendChild(iconEl);
-  }
-  else {
-    const iconEl = document.createElement('ion-icon');
-    iconEl.name = 'document';
-    iconContainerEl.appendChild(iconEl);
-  }
 
   const fileData = ItemDataView(filename, item);
   inner.appendChild(fileData.dom);
@@ -242,7 +231,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
         thumbEl.src = url;
       })
 
-      iconContainerEl.replaceChild(thumbContainerEl, iconContainerEl.firstChild);
+      thumbPlaceholderEl.appendChild(thumbContainerEl);
     }
   }
 
