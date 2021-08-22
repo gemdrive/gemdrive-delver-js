@@ -1,4 +1,5 @@
 import { AddDrive } from './add_drive.js';
+import { Button } from './common.js';
 
 
 export const DriveList = (drives) => {
@@ -29,8 +30,7 @@ export const DriveList = (drives) => {
     dom.appendChild(driveEl);
   }
 
-  const addDriveBtn = document.createElement('button');
-  addDriveBtn.innerText = "Add Drive";
+  const addDriveBtn = Button("Add Drive");
   dom.appendChild(addDriveBtn);
 
   const addDriveEl = AddDrive();

@@ -1,3 +1,6 @@
+import { Button } from './common.js';
+
+
 export const AddDrive = (drives) => {
   const dom = document.createElement('div');
   dom.classList.add('gemdrive-delver-add-drive');
@@ -14,8 +17,7 @@ export const AddDrive = (drives) => {
   });
   dom.appendChild(textInputEl);
 
-  const addBtnEl = document.createElement('button');
-  addBtnEl.innerText = "Add";
+  const addBtnEl = Button("Add");
   addBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('add-drive', {
       bubbles: true,
@@ -26,8 +28,7 @@ export const AddDrive = (drives) => {
   });
   dom.appendChild(addBtnEl);
 
-  const cancelBtnEl = document.createElement('button');
-  cancelBtnEl.innerText = "Cancel";
+  const cancelBtnEl = Button("Cancel");
   cancelBtnEl.addEventListener('click', () => {
     dom.dispatchEvent(new CustomEvent('cancel-add-drive', {
       bubbles: true,

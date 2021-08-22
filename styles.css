@@ -19,7 +19,7 @@ html {
   background-color: #fff;
   border: 1px solid #000;
   z-index: 1000;
-  font-size: 42px;
+  /*font-size: 42px;*/
   font-weight: bold;
 }
 
@@ -197,7 +197,7 @@ html {
   user-select: none;
   cursor: pointer;
   font-family: -system-ui, sans-serif;
-  /*font-size: 1em;*/
+  font-size: 1em;
   line-height: 1.2;
   white-space: nowrap;
 }

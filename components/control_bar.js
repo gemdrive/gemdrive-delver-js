@@ -1,4 +1,5 @@
 import { encodePath, removeAllChildren } from '../utils.js';
+import { Button } from './common.js';
 
 export const ControlBar = () => {
   const dom = document.createElement('div');
@@ -193,11 +194,3 @@ const OpenExternalButton = (rootUrl, pathStr, token) => {
   return dom;
 };
 
-
-const Button = (text) => {
-  const dom = document.createElement('button');
-  //dom.classList.add('gemdrive-delver-button');
-  dom.classList.add('button');
-  dom.innerText = text;
-  return dom;
-};
