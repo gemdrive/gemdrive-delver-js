@@ -70,6 +70,18 @@ const GemDriveDelver = async (options) => {
     }
   });
 
+  pageEl.addEventListener('remove-drive', async (e) => {
+    const driveUri = e.detail.url;
+
+    const doIt = await showConfirmDialog("Are you sure you want to remove " + driveUri + "?");
+    if (doIt) {
+
+      delete settings.drives[driveUri];
+      localStorage.setItem('settings', JSON.stringify(settings));
+      driveList.removeDrive(driveUri);
+    }
+  });
+
   controlBar.dom.addEventListener('navigate-back', async (e) => {
     window.history.back();
   });

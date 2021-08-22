@@ -7,7 +7,9 @@ export const DriveList = (drives) => {
   dom.classList.add('gemdrive-delver-drives-list');
 
   const header = document.createElement('h1');
-  header.innerText = "Drives:";
+  //header.innerText = "Drives:";
+  //
+  const driveElMap = {};
   dom.appendChild(header);
 
   for (const key in drives) {
@@ -17,7 +19,7 @@ export const DriveList = (drives) => {
 
   function appendDrive(url, drives) {
     const driveEl = document.createElement('div');
-    driveEl.classList.add('gemdrive-delver__list-content');
+    driveEl.classList.add('gemdrive-delver__list-content', 'gemdrive-delver__drive-list');
     driveEl.innerText = url;
     driveEl.addEventListener('click', (e) => {
       dom.dispatchEvent(new CustomEvent('select-drive', {
@@ -27,7 +29,23 @@ export const DriveList = (drives) => {
         },
       }));
     });
+
+    const removeButtonEl = Button("Remove");
+    driveEl.appendChild(removeButtonEl);
+    removeButtonEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      dom.dispatchEvent(new CustomEvent('remove-drive', {
+        bubbles: true,
+        detail: {
+          url,
+        },
+      }));
+    });
+
+
     dom.appendChild(driveEl);
+    driveElMap[url] = driveEl;
   }
 
   const addDriveBtn = Button("Add Drive");
@@ -50,8 +68,13 @@ export const DriveList = (drives) => {
     dom.appendChild(addDriveBtn);
   }
 
+  function removeDrive(url) {
+    dom.removeChild(driveElMap[url]);
+  }
+
   return {
     dom,
-    addDrive
+    addDrive,
+    removeDrive,
   };
 };
