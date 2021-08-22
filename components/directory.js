@@ -1,4 +1,5 @@
 import { encodePath, removeAllChildren, formatBytes } from '../utils.js';
+import { Button } from './common.js';
 
 // https://stackoverflow.com/a/38641281/943814
 const naturalSorter = new Intl.Collator(undefined, {
@@ -294,10 +295,8 @@ const ImagePreview = (rootUrl, path, thumbnailPromise, token) => {
 
 const DownloadButton = (driveUri, path, token) => {
   const dom = document.createElement('span');
-  dom.classList.add('gemdrive-delver-icon-button');
-  const iconEl = document.createElement('ion-icon');
-  iconEl.name = 'download';
-  dom.appendChild(iconEl);
+  const btnEl = Button("Download");
+  dom.appendChild(btnEl);
 
   dom.addEventListener('click', async (e) => {
     const pathStr = encodePath(path);
@@ -322,11 +321,8 @@ const DownloadButton = (driveUri, path, token) => {
 
 const OpenTabButton = (driveUri, path, token) => {
   const dom = document.createElement('span');
-  dom.classList.add('gemdrive-delver-icon-button');
-  const iconEl = document.createElement('ion-icon');
-  //iconEl.name = 'link';
-  iconEl.name = 'open';
-  dom.appendChild(iconEl);
+  const btnEl = Button("Open in Tab");
+  dom.appendChild(btnEl);
 
   dom.addEventListener('click', async (e) => {
     const pathStr = encodePath(path);

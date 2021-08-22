@@ -172,7 +172,7 @@ html {
 
 .gemdrive-icon-row {
   display: flex;
-  font-size: 48px;
+  /*font-size: 48px;*/
 }
 
 .gemdrive-file-data {
