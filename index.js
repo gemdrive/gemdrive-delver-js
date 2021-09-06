@@ -352,29 +352,27 @@ const GemDriveDelver = async (options) => {
         const url = selectedUrls[i];
         const item = selectedItems[i];
 
-        let copyCommandUrl = state.curDriveUri + encodePath(state.curPath) + '?remfs-method=remote-download&url=' + encodeURIComponent(url);
-        let sseUrl = state.curDriveUri + encodePath(state.curPath) + '?events=true';
+        let copyCommandUrl = state.curDriveUri + '/gemdrive/remote-get';
 
         if (drive.accessToken) {
-          copyCommandUrl += '&access_token=' + drive.accessToken;
-          sseUrl += '&access_token=' + drive.accessToken;
+          copyCommandUrl += '?access_token=' + drive.accessToken;
         }
 
         const progress = Progress(item.size);
         pageEl.insertBefore(progress.dom, pageEl.firstChild);
 
-        const sse = new EventSource(sseUrl); 
-        sse.addEventListener('update', (e) => {
-          const event = JSON.parse(e.data);
-          progress.updateCount(event.remfs.size);
-
-          if (event.type === 'complete') {
-            sse.close();
-          }
-        });
+        const u = new URL(url);
+        const segments = u.pathname.split('/');
+        const filename = segments[segments.length - 1];
 
         try {
-          await fetch(copyCommandUrl)
+          await fetch(copyCommandUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+              source: url,
+              destination: encodePath(state.curPath) + '/' + filename,
+            }),
+          })
           state.selectedItems = {};
           controlBar.onSelectedItemsChange(state.selectedItems);
           navigate(state.curDriveUri, state.curPath);
