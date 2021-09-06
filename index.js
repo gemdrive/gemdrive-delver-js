@@ -50,7 +50,7 @@ const GemDriveDelver = async (options) => {
 
     if (result.err) {
       if (result.err === 403) {
-        loginPrompt(result.gemUrl, '/');
+        keyPrompt(result.gemUrl, '/');
 
         const drive = {};
         settings.drives[result.gemUrl] = drive;
@@ -137,7 +137,7 @@ const GemDriveDelver = async (options) => {
           navigate(state.curDriveUri, state.curPath);
         }
         else if (response.status === 403) {
-          loginPrompt(state.curDriveUri, '/');
+          keyPrompt(state.curDriveUri, '/');
         }
         else {
           alert("Creating directory failed for unknown reason.");
@@ -213,7 +213,7 @@ const GemDriveDelver = async (options) => {
       controlBar.onLocationChange(driveUri, path, drive.accessToken);
     }
     else if (gemDataResponse.status === 403) {
-      loginPrompt(driveUri, encodePath(path));
+      keyPrompt(driveUri, encodePath(path));
     }
   }
 
@@ -387,7 +387,7 @@ const GemDriveDelver = async (options) => {
   });
 
   controlBar.dom.addEventListener('authorize', (e) => {
-    loginPrompt(state.curDriveUri, '/');
+    keyPrompt(state.curDriveUri, '/');
   });
 
   controlBar.dom.addEventListener('delete', async (e) => {
@@ -408,7 +408,7 @@ const GemDriveDelver = async (options) => {
             navigate(state.curDriveUri, state.curPath);
           }
           else if (response.status === 403) {
-            loginPrompt(state.curDriveUri, '/');
+            keyPrompt(state.curDriveUri, '/');
           }
           else {
             alert("Failed delete for unknown reason.");
@@ -421,22 +421,11 @@ const GemDriveDelver = async (options) => {
     }
   });
 
-  async function loginPrompt(driveUri, path) {
-    const key = await showPromptDialog(`You do not have access to\n${driveUri + path}\nEnter a key to login:`);
+  async function keyPrompt(driveUri, path) {
+    const key = await showPromptDialog(`You do not have access to\n${driveUri + path}\nEnter a key:`);
 
-    const loginUrl = driveUri + path + `gemdrive/login?access_token=${key}`;
-
-    let res = await fetch(loginUrl, {
-      method: 'POST',
-      //credentials: 'include',
-    });
-
-    if (res.status === 200) {
-      const newKey = await res.text();
-
-      settings.drives[driveUri].accessToken = newKey;
-      localStorage.setItem('settings', JSON.stringify(settings));
-    }
+    settings.drives[driveUri].accessToken = key;
+    localStorage.setItem('settings', JSON.stringify(settings));
   }
 
   return dom;
