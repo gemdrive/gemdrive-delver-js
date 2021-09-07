@@ -4,6 +4,7 @@ import { DriveList } from './components/drive_list.js';
 import { Directory } from './components/directory.js';
 import { Progress } from './components/progress.js';
 import { showConfirmDialog, showPromptDialog } from './components/dialog.js';
+import gemdrive from './gemdrive.js';
 
 
 const GemDriveDelver = async (options) => {
@@ -325,61 +326,37 @@ const GemDriveDelver = async (options) => {
 
   pageEl.addEventListener('item-selected', (e) => {
     const { driveUri, path, item } = e.detail;
-    const selectUrl = driveUri + encodePath(path);
     if (!state.selectedItems[driveUri]) {
       state.selectedItems[driveUri] = {};
     }
-    state.selectedItems[driveUri][encodePath(path)] = item;
+
+    state.selectedItems[driveUri][path] = item;
     controlBar.onSelectedItemsChange(state.selectedItems);
   });
   pageEl.addEventListener('item-deselected', (e) => {
     const { driveUri, path } = e.detail;
-    delete state.selectedItems[driveUri][encodePath(path)];
+    delete state.selectedItems[driveUri][path];
     controlBar.onSelectedItemsChange(state.selectedItems);
   });
 
   controlBar.dom.addEventListener('copy', async (e) => {
 
-    const { numItems, selectedUrls, selectedItems } = buildSelectedUrls(state, settings);
+    //const { numItems, selectedUrls, selectedItems } = buildSelectedUrls(state, settings);
 
-    const doIt = await showConfirmDialog(`Are you sure you want to copy ${numItems} items?`);
+    const copyList = buildCopyList(state, settings);
+    console.log(copyList)
+
+    const doIt = await showConfirmDialog(`Are you sure you want to copy ${copyList.length} items?`);
     
     if (doIt) {
 
-      const drive = settings.drives[state.curDriveUri];
 
-      for (let i = 0; i < selectedUrls.length; i++) {
-        const url = selectedUrls[i];
-        const item = selectedItems[i];
+      for (const item of copyList) {
+        const srcToken = settings.drives[item.driveUri].accessToken;
+        const destToken = settings.drives[state.curDriveUri].accessToken;
+        const destDir = encodePath(state.curPath) + '/';
 
-        let copyCommandUrl = state.curDriveUri + '/gemdrive/remote-get';
-
-        if (drive.accessToken) {
-          copyCommandUrl += '?access_token=' + drive.accessToken;
-        }
-
-        const progress = Progress(item.size);
-        pageEl.insertBefore(progress.dom, pageEl.firstChild);
-
-        const u = new URL(url);
-        const segments = u.pathname.split('/');
-        const filename = segments[segments.length - 1];
-
-        try {
-          await fetch(copyCommandUrl, {
-            method: 'POST',
-            body: JSON.stringify({
-              source: url,
-              destination: encodePath(state.curPath) + '/' + filename,
-            }),
-          })
-          state.selectedItems = {};
-          controlBar.onSelectedItemsChange(state.selectedItems);
-          navigate(state.curDriveUri, state.curPath);
-        }
-        catch (e) {
-          alert("Failed to copy");
-        }
+        gemdrive.copy(item.driveUri, item.path, srcToken, state.curDriveUri, destDir, destToken);
       }
     } 
   });
@@ -463,6 +440,30 @@ function parseGemDataTsv(text) {
   }
 
   return gemData;
+}
+
+function buildCopyList(state, settings) {
+  let numItems = 0;
+  const copyList = [];
+
+  for (const driveUri in state.selectedItems) {
+
+    const drive = settings.drives[driveUri];
+
+    for (const itemPath in state.selectedItems[driveUri]) {
+      numItems += 1;
+
+      const item = state.selectedItems[driveUri][itemPath];
+
+      copyList.push({
+        driveUri,
+        path: itemPath,
+        size: item.size,
+      });
+    }
+  }
+
+  return copyList;
 }
 
 function buildSelectedUrls(state, settings) {

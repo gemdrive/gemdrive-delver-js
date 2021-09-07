@@ -116,6 +116,8 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
   dom.classList.add('gemdrive-delver__list-item');
   //dom.setAttribute('href', rootUrl + encodePath(path));
 
+  const isDir = filename.endsWith('/');
+
   let showPreview = false;
 
   const inner = document.createElement('div');
@@ -135,12 +137,14 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
 
     e.stopPropagation();
 
+    const itemPath = isDir ? encodePath(path) + '/' : encodePath(path);
+
     if (checkboxEl.checked) {
       dom.dispatchEvent(new CustomEvent('item-selected', {
         bubbles: true,
         detail: {
           driveUri: rootUrl,
-          path,
+          path: itemPath,
           item,
         },
       }));
@@ -150,7 +154,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
         bubbles: true,
         detail: {
           driveUri: rootUrl,
-          path,
+          path: itemPath,
         },
       }));
     }
@@ -165,8 +169,6 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
   inner.appendChild(thumbPlaceholderEl);
 
   let thumbnailPromise;
-
-  const isDir = filename.endsWith('/');
 
   const fileData = ItemDataView(filename, item);
   inner.appendChild(fileData.dom);
@@ -213,6 +215,7 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
   });
 
   function onVisible() {
+    // TODO: why not encode the whole path rather than slicing and adding filename?
     const dirPathStr = encodePath(path.slice(0, -1)) + '/';
     const thumbUrl = rootUrl + '/gemdrive/images/256' + dirPathStr + filename;
 
