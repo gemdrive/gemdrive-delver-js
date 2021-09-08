@@ -341,10 +341,7 @@ const GemDriveDelver = async (options) => {
 
   controlBar.dom.addEventListener('copy', async (e) => {
 
-    //const { numItems, selectedUrls, selectedItems } = buildSelectedUrls(state, settings);
-
     const copyList = buildCopyList(state, settings);
-    console.log(copyList)
 
     const doIt = await showConfirmDialog(`Are you sure you want to copy ${copyList.length} items?`);
     

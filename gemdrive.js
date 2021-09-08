@@ -23,8 +23,6 @@ async function makeDir(drive, path, token, recursive) {
 
 async function copyDir(srcDrive, srcPath, srcToken, dstDrive, dstPath, dstToken, tree) {
 
-  console.log("copyDir", srcDrive, srcPath, srcToken, dstDrive, dstPath, dstToken, tree); 
-
   const srcPathSegments = srcPath.split('/');
   const dstDirName = srcPathSegments[srcPathSegments.length - 2];
   const newDstDir = dstPath + dstDirName + '/';
@@ -63,14 +61,14 @@ async function copyDir(srcDrive, srcPath, srcToken, dstDrive, dstPath, dstToken,
     for (const [name, item] of Object.entries(tree.children)) {
 
       const childSrcPath = srcPath + name;
-      const childDstPath = newDstDir + name;
 
       const isDir = name.endsWith('/');
 
       if (isDir) {
-        await copyDir(srcDrive, childSrcPath, srcToken, dstDrive, dstPath, dstToken, tree.children[name]);
+        await copyDir(srcDrive, childSrcPath, srcToken, dstDrive, newDstDir, dstToken, tree.children[name]);
       }
       else {
+        const childDstPath = newDstDir + name;
         await copyFile(srcDrive, childSrcPath, srcToken, dstDrive, childDstPath, dstToken);
       }
     }
