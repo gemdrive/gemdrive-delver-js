@@ -353,7 +353,11 @@ const GemDriveDelver = async (options) => {
         const destToken = settings.drives[state.curDriveUri].accessToken;
         const destDir = encodePath(state.curPath) + '/';
 
-        gemdrive.copy(item.driveUri, item.path, srcToken, state.curDriveUri, destDir, destToken);
+        await gemdrive.copy(item.driveUri, item.path, srcToken, state.curDriveUri, destDir, destToken);
+
+        state.selectedItems = {};
+        controlBar.onSelectedItemsChange(state.selectedItems);
+        navigate(state.curDriveUri, state.curPath);
       }
     } 
   });
@@ -445,7 +449,7 @@ function parseGemDataTsv(text) {
 
 function buildSelectedList(state, settings) {
   let numItems = 0;
-  const copyList = [];
+  const selected = [];
 
   for (const driveUri in state.selectedItems) {
 
@@ -456,7 +460,7 @@ function buildSelectedList(state, settings) {
 
       const item = state.selectedItems[driveUri][itemPath];
 
-      copyList.push({
+      selected.push({
         driveUri,
         path: itemPath,
         size: item.size,
@@ -464,7 +468,7 @@ function buildSelectedList(state, settings) {
     }
   }
 
-  return copyList;
+  return selected;
 }
 
 function buildSelectedUrls(state, settings) {
