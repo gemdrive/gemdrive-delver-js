@@ -354,11 +354,11 @@ const GemDriveDelver = async (options) => {
         const destDir = encodePath(state.curPath) + '/';
 
         await gemdrive.copy(item.driveUri, item.path, srcToken, state.curDriveUri, destDir, destToken);
-
-        state.selectedItems = {};
-        controlBar.onSelectedItemsChange(state.selectedItems);
-        navigate(state.curDriveUri, state.curPath);
       }
+
+      state.selectedItems = {};
+      controlBar.onSelectedItemsChange(state.selectedItems);
+      navigate(state.curDriveUri, state.curPath);
     } 
   });
 
@@ -373,31 +373,27 @@ const GemDriveDelver = async (options) => {
     const doIt = await showConfirmDialog(`Are you sure you want to delete ${deleteList.length} items?`);
     
     if (doIt) {
+
       for (const item of deleteList) {
         const token = settings.drives[item.driveUri].accessToken;
 
         const url = item.driveUri + item.path + '?recursive=true&access_token=' + token;
 
-        fetch(url, {
+        const response = await fetch(url, {
           method: 'DELETE',
-        })
-        .then(async (response) => {
-          if (response.status === 200) {
-            state.selectedItems = {};
-            controlBar.onSelectedItemsChange(state.selectedItems);
-            navigate(state.curDriveUri, state.curPath);
-          }
-          else if (response.status === 403) {
-            keyPrompt(item.driveUri, '/');
-          }
-          else {
-            alert("Failed delete for unknown reason.");
-          }
-        })
-        .catch((e) => {
-          console.error(e);
         });
+
+        if (response.status === 403) {
+          keyPrompt(item.driveUri, '/');
+        }
+        else if (response.status < 200 || response.status > 299) {
+          alert("Failed delete for unknown reason.");
+        }
       }
+
+      state.selectedItems = {};
+      controlBar.onSelectedItemsChange(state.selectedItems);
+      navigate(state.curDriveUri, state.curPath);
     }
   });
 
