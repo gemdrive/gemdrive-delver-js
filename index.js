@@ -341,7 +341,7 @@ const GemDriveDelver = async (options) => {
 
   controlBar.dom.addEventListener('copy', async (e) => {
 
-    const copyList = buildCopyList(state, settings);
+    const copyList = buildSelectedList(state, settings);
 
     const doIt = await showConfirmDialog(`Are you sure you want to copy ${copyList.length} items?`);
     
@@ -364,12 +364,16 @@ const GemDriveDelver = async (options) => {
 
   controlBar.dom.addEventListener('delete', async (e) => {
     
-    const { numItems, selectedUrls } = buildSelectedUrls(state, settings);
+    const deleteList = buildSelectedList(state, settings);
 
-    const doIt = await showConfirmDialog(`Are you sure you want to delete ${numItems} items?`);
+    const doIt = await showConfirmDialog(`Are you sure you want to delete ${deleteList.length} items?`);
     
     if (doIt) {
-      for (const url of selectedUrls) {
+      for (const item of deleteList) {
+        const token = settings.drives[item.driveUri].accessToken;
+
+        const url = item.driveUri + item.path + '?recursive=true&access_token=' + token;
+
         fetch(url, {
           method: 'DELETE',
         })
@@ -380,7 +384,7 @@ const GemDriveDelver = async (options) => {
             navigate(state.curDriveUri, state.curPath);
           }
           else if (response.status === 403) {
-            keyPrompt(state.curDriveUri, '/');
+            keyPrompt(item.driveUri, '/');
           }
           else {
             alert("Failed delete for unknown reason.");
@@ -439,7 +443,7 @@ function parseGemDataTsv(text) {
   return gemData;
 }
 
-function buildCopyList(state, settings) {
+function buildSelectedList(state, settings) {
   let numItems = 0;
   const copyList = [];
 
