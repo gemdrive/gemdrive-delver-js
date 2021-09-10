@@ -84,6 +84,7 @@ async function copyFile(srcDrive, srcPath, srcToken, dstDrive, dstPath, dstToken
     body: JSON.stringify({
       source: srcDrive + srcPath + '?access_token=' + srcToken,
       destination: dstPath,
+      preserveAttributes: true,
     }),
   });
 }
