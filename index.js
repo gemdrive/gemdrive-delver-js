@@ -239,10 +239,17 @@ const GemDriveDelver = async (options) => {
     for (const param of formData.entries()) {
       const file = param[1];
 
-      const uploadPath = [...state.curPath, file.name];
-      let uploadUrl = state.curDriveUri + encodePath(uploadPath);
-
       const drive = settings.drives[state.curDriveUri];
+
+      const localPathSegments = file.name.split('/');
+
+      const uploadPath = [...state.curPath, ...localPathSegments];
+
+      const uploadDir = encodePath(uploadPath.slice(0, -1)) + '/';
+      const recursive = true;
+      await gemdrive.makeDir(state.curDriveUri, uploadDir, drive.accessToken, recursive);
+
+      let uploadUrl = state.curDriveUri + encodePath(uploadPath);
       if (drive.accessToken) {
         uploadUrl += '?access_token=' + drive.accessToken;
       }
@@ -262,9 +269,9 @@ const GemDriveDelver = async (options) => {
       await uploadFile(uploadUrl, file);
 
       clearInterval(intervalId);
-
-      navigate(state.curDriveUri, state.curPath);
     }
+
+    navigate(state.curDriveUri, state.curPath);
   };
 
   async function uploadFile(uploadUrl, file) {
@@ -321,6 +328,12 @@ const GemDriveDelver = async (options) => {
   controlBar.dom.addEventListener('upload', (e) => {
     if (state.curDriveUri) {
       fileInput.click();
+    }
+  });
+
+  controlBar.dom.addEventListener('upload-directory', (e) => {
+    if (state.curDriveUri) {
+      folderInput.click();
     }
   });
 

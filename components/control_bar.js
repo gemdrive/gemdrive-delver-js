@@ -76,6 +76,14 @@ export const ControlBar = () => {
   });
   btnContainerEl.appendChild(uploadBtnEl);
 
+  const uploadDirBtnEl = Button('Upload Folder');
+  uploadDirBtnEl.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('upload-directory', {
+      bubbles: true,
+    }));
+  });
+  btnContainerEl.appendChild(uploadDirBtnEl);
+
   const newDirBtnEl = Button('New Directory');
   newDirBtnEl.addEventListener('click', (e) => {
     dom.dispatchEvent(new CustomEvent('create-directory', {

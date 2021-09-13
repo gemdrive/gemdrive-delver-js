@@ -91,4 +91,5 @@ async function copyFile(srcDrive, srcPath, srcToken, dstDrive, dstPath, dstToken
 
 export default {
   copy,
+  makeDir,
 };
