@@ -329,8 +329,14 @@ const OpenTabButton = (driveUri, path, token) => {
 
   dom.addEventListener('click', async (e) => {
     const pathStr = encodePath(path);
-    const authenticatedLink = await getAuthenticatedLink(driveUri, pathStr, token);
-    window.open(authenticatedLink);
+
+    if (token === '') {
+      window.open(driveUri + path);
+    }
+    else {
+      const authenticatedLink = await getAuthenticatedLink(driveUri, pathStr, token);
+      window.open(authenticatedLink);
+    }
   });
 
   return dom;
