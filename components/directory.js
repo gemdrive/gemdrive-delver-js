@@ -216,7 +216,10 @@ const ListItem = (state, filename, item, rootUrl, path, token) => {
 
   function onVisible() {
     // TODO: why not encode the whole path rather than slicing and adding filename?
-    const dirPathStr = encodePath(path.slice(0, -1)) + '/';
+    let dirPathStr = encodePath(path.slice(0, -1));
+    if (!dirPathStr.endsWith('/')) {
+      dirPathStr += '/';
+    }
     const thumbUrl = rootUrl + '/gemdrive/images/256' + dirPathStr + filename;
 
     if (isImage(thumbUrl)) {
@@ -440,9 +443,12 @@ function getPreviewUrl(rootUrl, path, parentEl) {
     previewWidth = 2048;
   }
 
-  const dirPathStr = encodePath(path.slice(0, -1));
+  let dirPathStr = encodePath(path.slice(0, -1));
+  if (!dirPathStr.endsWith('/')) {
+    dirPathStr += '/';
+  }
   const filename = path[path.length - 1];
-  return `${rootUrl}/gemdrive/images/${previewWidth}${dirPathStr}/${filename}`;
+  return `${rootUrl}/gemdrive/images/${previewWidth}${dirPathStr}${filename}`;
 }
 
 function isImage(pathStr) {

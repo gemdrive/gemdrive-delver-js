@@ -236,6 +236,7 @@ const GemDriveDelver = async (options) => {
   const uppie = new Uppie();
 
   const handleFiles = async (e, formData, filenames) => {
+
     for (const param of formData.entries()) {
       const file = param[1];
 
@@ -245,7 +246,11 @@ const GemDriveDelver = async (options) => {
 
       const uploadPath = [...state.curPath, ...localPathSegments];
 
-      const uploadDir = encodePath(uploadPath.slice(0, -1)) + '/';
+      let uploadDir = encodePath(uploadPath.slice(0, -1));
+      if (!uploadDir.endsWith('/')) {
+        uploadDir += '/';
+      }
+
       const recursive = true;
       await gemdrive.makeDir(state.curDriveUri, uploadDir, drive.accessToken, recursive);
 
